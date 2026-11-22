@@ -825,7 +825,7 @@
     }
     function dialog(page) {
       clearTimeout(autoTimer); const body = byId("overlayBody"); body.replaceChildren();
-      byId("overlayTitle").textContent = page==="history"?"回看对白":page==="settings"?"设置":"暂停";
+      byId("overlayTitle").textContent = page==="history"?"回看对白":page==="settings"?"设置":page==="credits"?"音乐与素材":"暂停";
       if (page==="history") {
         for (const entry of state.log) {
           const p = document.createElement("p"), b = document.createElement("b");
@@ -838,11 +838,20 @@
           input.type="checkbox"; input.checked=!!prefs[key]; input.onchange=()=>{ prefs[key]=input.checked; settings(); layout(); };
           l.append(input,document.createTextNode(label)); body.append(l);
         }
+      } else if (page==="credits") {
+        const credit=document.createElement("p");
+        credit.textContent="配乐：Dark Walk — Kevin MacLeod（incompetech.com）。本作作循环交叠、响度调整及 AAC 转码。";
+        body.append(credit);
+        for(const [label,href] of [["原曲与作者","https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100468"],["Creative Commons Attribution 4.0","https://creativecommons.org/licenses/by/4.0/"],["声音来源与处理记录","sfx/雨巷声场.json"],["字体许可 · 思源宋体","../passage/ui/LICENSE-ADOBE.txt"],["字体许可 · 霞鹜文楷","../passage/ui/OFL-LXGW.txt"]]) {
+          const p=document.createElement("p"),a=document.createElement("a");
+          a.textContent=label;a.href=href;a.target="_blank";a.rel="noopener noreferrer";p.append(a);body.append(p);
+        }
       } else {
         if (mode==="explore") for (const a of story.places[state.place].reviews || []) {
           if (wants(state.flags,a.need)) makeButton(body,"复查 · "+a.label,()=>{overlay.close();beginBeat(a.key);});
         }
         makeButton(body,"回看对白",()=>dialog("history")); makeButton(body,"设置",()=>dialog("settings"));
+        makeButton(body,"音乐与素材",()=>dialog("credits"));
         makeButton(body,"返回标题",()=>{overlay.close(); title();});
       }
       if (!overlay.open) { menuFrom=document.activeElement; overlay.showModal(); sounds?.pause(true); }

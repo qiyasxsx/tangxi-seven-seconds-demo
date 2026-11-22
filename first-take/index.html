@@ -1,84 +1,17 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#101d23"><title>棠西村秘闻 · 七秒以后</title>
-  <link rel="stylesheet" href="../passage/ui/tokens.css"><link rel="stylesheet" href="scene.css?v=field"><link rel="stylesheet" href="phone-choice.css?v=field">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101d23">
+  <title>棠西村秘闻 · 七秒以后</title>
+  <link rel="stylesheet" href="landscape.css?v=landscape1">
 </head>
 <body>
-  <main id="stage" data-mode="title">
-    <div id="scene">
-      <div id="world"><div id="scenery"><img id="plate" alt=""><div id="marks" aria-hidden="true"></div></div></div><div id="pins" role="group" aria-label="场景中的调查与通路"></div>
-      <div id="lookControls" hidden><button type="button" data-direction="-1" aria-label="向左看" hidden>‹</button><button type="button" data-direction="1" aria-label="向右看" hidden>›</button></div>
-      <div id="cast"><div id="rightActor"></div><div id="leftActor"></div></div>
-      <img id="insert" hidden alt=""><img id="glassEnd" hidden alt="">
-      <div id="evidence" hidden><span id="evidenceLabel"></span><time id="evidenceTime"></time><i></i></div>
-      <figure id="fieldView" hidden><img id="fieldPicture" alt=""><figcaption id="fieldCaption"></figcaption></figure>
-      <aside id="phoneProof" hidden aria-label="林雨的手机">
-        <div id="handset">
-          <div class="phoneScreen">
-            <header class="phoneHeader">
-              <span class="phoneBrand"><i aria-hidden="true"></i>巷映</span>
-              <div id="phoneTabs" role="group" aria-label="查看来源"><button id="originalTab" type="button" aria-pressed="true">投稿原片</button><button id="postTab" type="button" aria-pressed="false">节目转发</button></div>
-              <span id="phoneChannel" hidden></span>
-            </header>
-            <div id="videoPage">
-              <div id="phoneMedia" aria-label="七秒雨巷视频">
-                <img id="clipLast" alt="姑娘伸手求助，写着宵的灯牌亮着，雨棚挡住侧门。"><img id="clipLead" alt=""><canvas id="clipRain" aria-hidden="true"></canvas>
-                <button id="filmSurface" type="button" tabindex="-1" aria-label="播放这七秒"></button>
-                <i id="playCue" aria-hidden="true" hidden></i>
-              </div>
-              <div class="filmActions">
-                <button id="filmSave" type="button" aria-pressed="false">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5h11v15L12 16l-5.5 3.5z"/></svg><span>收藏</span>
-                </button>
-                <button id="filmSound" type="button" aria-pressed="true">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 9h4l5-4v14l-5-4h-4z"/><path class="soundWaves" d="M15.5 9a4.5 4.5 0 0 1 0 6m2.5-9a8 8 0 0 1 0 12"/><path class="soundCross" d="m16.5 9 5 6m0-6-5 6"/></svg><span>原声</span>
-                </button>
-              </div>
-              <div class="filmCredit">
-                <div class="phoneByline"><i class="sourceAvatar" aria-hidden="true"></i><b id="videoAuthor"></b><span id="videoRole"></span></div>
-                <p id="phoneCaption" hidden></p>
-                <p id="postContext" hidden></p>
-              </div>
-              <div id="filmTools">
-                <button id="filmPlay" type="button" aria-label="播放这七秒"><i aria-hidden="true"></i></button>
-                <div class="filmTrack"><time id="phoneTime">00:00 / 00:07</time><input id="filmSeek" type="range" min="0" max="7" step=".05" value="0" aria-label="七秒投稿播放位置"></div>
-              </div>
-            </div>
-            <div id="messagePage" hidden>
-              <div class="contact"><i class="sourceAvatar" aria-hidden="true"></i><b id="messageAuthor"></b></div>
-              <time id="messageTime" hidden></time>
-              <div class="phoneDispatch"><b id="noticeTitle" hidden></b><p id="messageBody"></p></div>
-            </div>
-          </div>
-          <button id="lowerPhone" type="button">放低手机</button>
-        </div>
-        <button id="raisePhone" type="button" hidden>再看手机</button>
-        <audio id="filmAudio" preload="none" src="../passage/sfx/rain.m4a"></audio>
-      </aside>
-      <div id="bridge" hidden></div>
-    </div>
-    <span id="chapter" hidden></span>
-    <button id="menu" type="button" aria-label="暂停菜单" hidden><i></i><i></i><i></i></button>
-    <button id="bubble" type="button" hidden><strong id="bubbleName"></strong><span id="bubbleWords"></span></button>
-    <section id="reader" hidden>
-      <p id="objective" hidden></p>
-      <div class="narration"><strong id="who"></strong><p id="line" aria-live="polite"></p></div>
-      <button id="next" type="button" aria-label="下一句">继续 <span aria-hidden="true">⌄</span></button>
-    </section>
-    <div id="choices" hidden></div>
-    <section id="title">
-      <div class="titleInk"><p class="chapter-title">序章　／　七秒以后</p><h1>棠西村<br>秘闻</h1>
-        <div class="titleActions"><button id="resume" hidden>继续调查</button><button id="new">从头开始</button></div>
-      </div>
-    </section>
-    <section id="ending" hidden>
-      <div class="tail"><p>序章　／　完</p><h1>七秒以后</h1><blockquote>明晚九点，三巷的铁牌旁。<br>相机先收着。</blockquote><button id="finish">回到标题</button></div>
-    </section>
-    <dialog id="overlay"><h2 id="overlayTitle"></h2><div id="overlayBody"></div><button id="closeMenu">返回</button></dialog>
-    <div id="status" role="status" hidden></div>
+  <main id="viewport" aria-label="横屏试玩">
+    <div id="screen"><iframe id="gameFrame" title="棠西村秘闻 · 七秒以后" allow="autoplay; fullscreen" allowfullscreen></iframe></div>
   </main>
-  <script src="cast-plates.js?v=field"></script><script src="art.js?v=field"></script><script src="story.js?v=field"></script><script src="../passage/sound.js?v=field" data-iron="./sfx/iron-three.wav" data-score="./sfx/wet-market.m4a" data-field="./sfx/" data-footsteps="./sfx/"></script><script src="evidence.js?v=field"></script><script src="atmosphere.js?v=field"></script><script src="entrance.js?v=field"></script><script src="performance.js?v=field"></script><script src="player.js?v=field"></script>
+  <noscript>请启用浏览器 JavaScript 后打开试玩。</noscript>
+  <script src="landscape.js?v=landscape1"></script>
 </body>
 </html>

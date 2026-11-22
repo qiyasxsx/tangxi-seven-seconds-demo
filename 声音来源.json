@@ -191,5 +191,26 @@
     "author": "棠西村项目",
     "license": "Project original",
     "source": "first-take/sfx/iron-three.wav"
+  },
+  {
+    "file": "first-take/sfx/wet-market.m4a",
+    "title": "Dark Walk",
+    "author": "Kevin MacLeod (incompetech.com)",
+    "license": "CC BY 4.0",
+    "licenseURL": "https://creativecommons.org/licenses/by/4.0/",
+    "source": "https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100468",
+    "download": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Dark%20Walk.mp3",
+    "sourceSha256": "9844d103a492b51e02cb89daeabb6da02d0d15f2568f887913690a051a3fdec6",
+    "bytes": 1443860,
+    "sha256": "653c89b7f03af566c68e8fcdd36d79c18167d2df7a3dab46415be29156b8f2d3",
+    "seconds": 81.77267573696145,
+    "sampleRate": 44100,
+    "channels": 2,
+    "samplePeakDBFS": -3.78,
+    "rmsDBFS": -18.19,
+    "processing": "4 秒余弦首尾交叠；整体增益与软限幅；AAC 144 kbps。游戏保留原环境声与分地点混音。",
+    "validation": "AAC 解码通过；RMS 与采样峰值已测。综合 LUFS、真峰值与真人听感未验证。",
+    "credit": "Dark Walk by Kevin MacLeod (incompetech.com), licensed under Creative Commons Attribution 4.0. Edited for looping, level and AAC encoding.",
+    "id": "dark-walk"
   }
 ]

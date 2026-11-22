@@ -1,6 +1,7 @@
 *{box-sizing:border-box}
 :root{color-scheme:dark;--ink:#0f1d24;--paper:#e0dfcf;--wash:#b9ccbd;--rule:#92a797;--edge:clamp(18px,4vw,68px)}
 html,body,#stage{width:100%;height:100%;margin:0}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{background:var(--ink);color:var(--paper);font:500 19px/1.55 var(--ui-copy);overflow:hidden}
 button{font:inherit;color:inherit;border:none;cursor:pointer;min-height:44px;touch-action:manipulation}
 button:focus-visible,input:focus-visible{outline:2px solid #bccdbb;outline-offset:4px}
@@ -108,6 +109,7 @@ dialog{background:#192c32;color:#e6e8da;padding:22px 26px;border:1px solid #8da1
 dialog::backdrop{background:#08141bb7}dialog h2{font:900 27px var(--ui-serif);padding-bottom:9px;border-bottom:1px solid #7f948b;margin:0 0 12px}
 dialog button,dialog label{display:block;width:100%;text-align:left;min-height:44px;padding:7px 10px;background:transparent}dialog label input{margin-right:12px}
 #overlayBody{max-height:55dvh;overflow:auto}#overlayBody p{margin:.4em 0 1em}#overlayBody b{color:var(--wash);font-family:var(--ui-serif)}
+#overlayBody a{color:var(--paper);text-underline-offset:.2em}
 #closeMenu{border-top:1px solid #879b8faa;margin-top:14px}
 #status{position:absolute;z-index:12;left:50%;top:15%;transform:translateX(-50%);max-width:85%;padding:9px 14px;background:#172b32f5;border-left:2px solid var(--wash)}
 #status button{background:#344f4c}
