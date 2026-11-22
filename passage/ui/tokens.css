@@ -1,0 +1,14 @@
+@font-face { font-family:"Tangxi Song"; src:url('./tangxi-source-han-serif-sc-heavy.woff2') format('woff2'); font-weight:900; font-style:normal; font-display:swap; }
+@font-face { font-family:"Tangxi Kai"; src:url('./tangxi-lxgw-wenkai-medium.woff2') format('woff2'); font-weight:500; font-style:normal; font-display:swap; }
+/* Approved R3 mockup palette. Colour roles stay local to UI, never to source art. */
+:root {
+ --ui-paper:#bbcdc5; --ui-paper-light:#eee9db; --ui-ink:#142631; --ui-muted-ink:#91a2a3;
+ --ui-teal:#334f51; --ui-teal-light:#9dbaa9; --ui-blue:#8daab6;
+ --ui-red:#ac4a3e; --ui-red-display:#ac4a3e; --ui-gold:#b2b99f; --ui-line:#738c8a; --ui-night:#0c1923;
+ --ui-serif:"Tangxi Song","Songti SC","SimSun",serif; --ui-display:var(--ui-serif);
+ --ui-copy:"Tangxi Kai","STKaiti","KaiTi",serif; --ui-sans:"PingFang SC","Microsoft YaHei",sans-serif;
+ --ui-touch:44px; --ui-speed:160ms; --ui-frame:1px solid #738c8a80;
+ --ui-paper-strip:url('./jade-paper.webp');
+ --ui-grain:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.78' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23g)' d='M0 0h180v180H0z'/%3E%3C/svg%3E");
+ --retro-strength:.22; --display-filter:url('#crt-display');
+}

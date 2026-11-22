@@ -1,0 +1,136 @@
+/* The video, private conversation and posted correction all use the same
+   glass. Physical actions belong to the game, outside that glass. */
+#insert[data-art=clip] { visibility:hidden }
+#stage[data-phone-raised=true] #cast { visibility:hidden }
+#stage[data-phone-raised=false]:not([data-phone-compare=true]) #cast { visibility:visible }
+#phoneProof { position:absolute; inset:0; z-index:5; pointer-events:none; color:#f1f2ea; font-family:var(--ui-sans) }
+#handset {
+  --phone-h:min(68svh,620px);
+  position:absolute; top:10%; left:61%; width:calc(var(--phone-h) * 350 / 764); height:var(--phone-h);
+  transform:translateX(-50%); isolation:isolate;
+}
+/* Within the 969 × 1204 cutout the live glass occupies 350 × 764 px at
+   (67,21). Keep that registration at every viewport, also for the thumb
+   painted across the glass and the four fingertips around the opposite edge. */
+#handset::before {
+  content:''; position:absolute; z-index:2; pointer-events:none;
+  width:276.8571%; aspect-ratio:969 / 1204; left:-19.1429%; top:-2.7487%;
+  background:url('art/phoneGrip.webp') center / contain no-repeat;
+}
+.phoneScreen {
+  position:relative; width:100%; height:100%; pointer-events:auto; overflow:hidden;
+  border-radius:8% / 4%; background:#101719; container-type:inline-size;
+}
+.phoneHeader {
+  position:absolute; z-index:4; inset:0 0 auto; display:flex; justify-content:space-between;
+  align-items:center; gap:4px; padding:8px 5.5% 0;
+  background:linear-gradient(#0c171af5 9%,#10191cb3 67%,transparent);
+  color:#f0f1e8; text-shadow:0 1px 4px #071318;
+}
+.phoneBrand { display:flex; align-items:center; gap:5px; white-space:nowrap; font-size:clamp(12px,5.1cqw,16px); font-weight:800; letter-spacing:.06em }
+.phoneBrand i { display:block; width:12px; height:14px; border:2px solid #e0ece3; border-radius:2px 5px 2px 3px; transform:skewY(-10deg); box-shadow:3px 2px #9b746d }
+#phoneTabs { display:flex; align-self:stretch }
+#phoneTabs button {
+  position:relative; padding:0 4px; margin:0 1px; min-width:44px; min-height:44px; color:#bbc5c0; background:transparent;
+  font:600 clamp(11px,4.9cqw,15px)/1.2 var(--ui-sans); white-space:nowrap; text-shadow:inherit;
+}
+#phoneTabs button[aria-pressed=true] { color:#fff; font-weight:800 }
+#phoneTabs button[aria-pressed=true]::after { content:''; position:absolute; bottom:4px; left:calc(50% - 8px); width:16px; height:2px; border-radius:2px; background:#e4ece2 }
+#phoneChannel { padding:13px 0; color:#c5d0c8; font-size:13px }
+#videoPage,#phoneMedia { position:absolute; inset:0 }
+#phoneMedia { overflow:hidden; background:#101719 }
+#phoneMedia img,#clipRain,#filmSurface { position:absolute; inset:0; width:100%; height:100% }
+#phoneMedia img,#clipRain { object-fit:contain; object-position:50% 35%; pointer-events:none }
+#clipLead { z-index:1 } #clipRain { z-index:2 }
+#filmSurface { z-index:3; border:0; background:transparent; padding:0; touch-action:manipulation }
+#playCue { position:absolute; z-index:4; pointer-events:none; top:47%; left:50%; transform:translate(-50%,-50%);
+  display:grid; place-items:center; width:43px; height:43px; border-radius:50%; background:#10191a99; color:#f1f2e9 }
+#playCue::after { content:''; margin-left:3px; border:solid transparent; border-width:8px 0 8px 13px; border-left-color:currentColor }
+#playCue[data-symbol=pause]::after { width:10px; height:15px; margin:0; border-width:0 3px; border-color:currentColor }
+.filmActions { position:absolute; z-index:4; right:2%; bottom:25%; display:grid; gap:2px }
+.filmActions button { display:grid; justify-items:center; align-content:center; gap:1px; width:44px; min-height:44px; padding:0;
+  color:#f2f3ea; background:transparent; font:600 10px/1.2 var(--ui-sans); text-shadow:0 1px 3px #0b1115,0 0 4px #0b1115 }
+.filmActions svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linejoin:round; stroke-linecap:round; filter:drop-shadow(0 1px 2px #0b1115) }
+#filmSave[aria-pressed=true] svg { fill:#e6d1a5; color:#f9ecd0 }
+#filmSound[aria-pressed=true] .soundCross,#filmSound[aria-pressed=false] .soundWaves { display:none }
+#filmSound:disabled { color:#d3d9cf; cursor:default }
+.filmCredit {
+  position:absolute; z-index:3; inset:auto 0 43px; padding:24px 6% 0; pointer-events:none;
+  color:#f3f4eb; background:linear-gradient(transparent,#0c151ad4 72%,#0c151aee);
+  text-shadow:0 1px 3px #061017;
+}
+.phoneByline,.contact { display:flex; align-items:center; gap:6px }
+.phoneByline b { font:700 clamp(13px,5.2cqw,17px)/1.25 var(--ui-sans) }
+.phoneByline > span { padding:1px 4px; border:1px solid #b0c5be88; border-radius:3px; color:#d9e5df; font:500 10px/1.3 var(--ui-sans) }
+.sourceAvatar {
+  position:relative; display:grid; place-items:center; flex:none; width:23px; height:23px; border:1px solid #a1b7ae;
+  border-radius:50%; background:#415950; color:#e4e7d9; text-shadow:none; font:700 13px var(--ui-serif); overflow:hidden;
+}
+.sourceAvatar::before { content:''; width:6px; height:6px; border-radius:50%; background:#c7d5c7; box-shadow:0 9px 0 4px #a7bcae; transform:translateY(-3px) }
+#phoneProof[data-version=repost] .filmCredit .sourceAvatar,
+#phoneProof[data-contact=account] .contact .sourceAvatar { background:#68483f; border-color:#bca18f }
+#phoneProof[data-version=repost] .filmCredit .sourceAvatar::before,
+#phoneProof[data-contact=account] .contact .sourceAvatar::before,
+#phoneProof[data-contact=landlord] .contact .sourceAvatar::before { content:'夜'; width:auto; height:auto; transform:none; box-shadow:none; background:transparent; border-radius:0 }
+#phoneProof[data-contact=landlord] .contact .sourceAvatar::before { content:'许' }
+#phoneCaption,#postContext { margin:5px 0 0; font:500 clamp(12px,4.9cqw,16px)/1.43 var(--ui-sans); overflow-wrap:anywhere }
+#phoneProof[data-version=repost] #phoneCaption { font-weight:700 }
+#postContext { font-size:clamp(11px,4.3cqw,14px); color:#c4d0c9 }
+#phoneProof #filmTools {
+  position:absolute; z-index:4; inset:auto 0 0; display:flex; align-items:center; gap:3px;
+  width:100%; height:44px; margin:0; padding:0 6% 0 2%; background:#0c151aee;
+}
+#phoneProof #filmPlay { display:grid; place-items:center; flex:0 0 44px; height:44px; border:0; padding:0; background:transparent; color:#e2ede2 }
+#filmPlay i { display:block; width:0; height:0; border:0 solid transparent; border-width:6px 0 6px 9px; border-left-color:currentColor }
+#filmPlay[data-action=pause] i { width:10px; height:13px; border-width:0 3px; border-color:currentColor }
+#filmPlay[data-action=replay] i { position:relative; width:13px; height:13px; border:1.8px solid currentColor; border-left-color:transparent; border-radius:50%; transform:rotate(-35deg) }
+#filmPlay[data-action=replay] i::after { content:''; position:absolute; top:-3px; left:0; width:0; height:0; border:3.5px solid transparent; border-right-color:currentColor; transform:rotate(-20deg) }
+.filmTrack { position:relative; flex:1; height:44px; min-width:0 }
+#phoneTime { position:absolute; top:1px; right:2px; pointer-events:none; color:#d8e0da; font:500 10px/1.2 var(--ui-sans); font-variant-numeric:tabular-nums }
+#phoneProof #filmSeek { appearance:none; -webkit-appearance:none; width:100%; height:44px; min-height:44px; margin:0; background:transparent; touch-action:none; cursor:ew-resize }
+#filmSeek::-webkit-slider-runnable-track { height:3px; border-radius:3px; background:linear-gradient(90deg,#e5ece5 var(--file-position),#708079 var(--file-position)) }
+#filmSeek::-webkit-slider-thumb { appearance:none; -webkit-appearance:none; width:11px; height:11px; margin-top:-4px; border:0; border-radius:50%; background:#f0f1e8 }
+#filmSeek::-moz-range-track { height:3px; background:#708079 }
+#filmSeek::-moz-range-progress { height:3px; background:#e5ece5 }
+#messagePage { height:100%; padding:64px 7% 20px; overflow:auto; background:linear-gradient(160deg,#263533,#152323 75%); color:#edf0e5 }
+.contact { gap:8px; padding-bottom:13px; border-bottom:1px solid #869d8f45; font:700 clamp(15px,6.1cqw,20px) var(--ui-sans) }
+.contact .sourceAvatar { width:32px; height:32px; font-size:16px }
+#messageTime { display:block; margin:15px 0 0; text-align:center; color:#bac9c1; font-size:12px }
+.phoneDispatch { margin-top:17px; padding:10px 12px; border-radius:2px 12px 12px 12px; background:#40534a; color:#f2f3e9 }
+#messageBody { margin:0; font:500 clamp(15px,5.8cqw,19px)/1.6 var(--ui-sans); white-space:pre-line; overflow-wrap:anywhere }
+#phoneProof[data-kind=notice] .phoneDispatch { padding:0; background:transparent }
+#noticeTitle { display:block; margin:0 0 9px; font:750 clamp(20px,8cqw,26px)/1.2 var(--ui-serif) }
+#lowerPhone,#raisePhone {
+  position:absolute; z-index:3; pointer-events:auto; color:#ebeee3; background:#152428ed;
+  border:1px solid #a6b5a799; border-radius:22px; padding:0 13px; min-height:44px;
+  font:600 13px/1.1 var(--ui-sans); white-space:nowrap;
+}
+#lowerPhone { top:calc(100% + 9px); left:2% }
+#raisePhone { right:8%; top:48% }
+#lowerPhone::before,#raisePhone::before { content:''; display:inline-block; width:7px; height:7px; margin:0 8px 3px 0; border:solid currentColor; border-width:0 1.5px 1.5px 0; transform:rotate(45deg) }
+#raisePhone::before { transform:rotate(225deg); margin-bottom:0 }
+#phoneProof button:focus-visible,#phoneProof input:focus-visible { outline:2px solid #e3efd8; outline-offset:-3px }
+#fieldView { position:absolute; z-index:4; inset:0; width:100%; height:100%; margin:0; color:#d8e4da; pointer-events:none }
+#stage[data-phone-compare=true] #cast { visibility:hidden }
+#fieldPicture { width:100%; height:100%; display:block; object-fit:cover; object-position:50% 53% }
+#fieldCaption { position:absolute; left:4%; bottom:24%; color:#e2e3d2; background:#142122dd; padding:4px 8px; border-left:2px solid #acbba6; font:500 clamp(12px,1.15vw,16px)/1.35 var(--ui-serif) }
+#phoneProof.comparing #handset { left:70% }
+.big #messageBody { font-size:clamp(18px,7.2cqw,24px) }
+.big #phoneCaption { font-size:clamp(15px,6.1cqw,21px) }
+@media (min-aspect-ratio:4/5) {
+  #fieldView[data-asset=roomView]:not([hidden]) + #phoneProof #handset { left:37% }
+}
+@media (max-aspect-ratio:4/5) {
+  #handset { --phone-h:min(53.5svh,550px,135vw); left:46%; top:9svh }
+  #fieldView { height:72%; bottom:auto }
+  #fieldPicture { object-position:79% center }
+  #fieldView[data-asset=roomView] #fieldPicture { object-position:100% center }
+  #fieldCaption { left:4%; bottom:4%; font-size:13px }
+  #phoneProof.comparing #handset { --phone-h:min(46svh,480px,118vw); left:70%; top:12svh }
+}
+@media (max-height:540px) and (min-aspect-ratio:4/5) {
+  #handset { --phone-h:71svh; top:4%; left:71% }
+  #phoneProof.comparing #handset { left:73% }
+  .phoneHeader { padding-top:1px }
+  #lowerPhone { top:calc(100% + 4px) }
+}
