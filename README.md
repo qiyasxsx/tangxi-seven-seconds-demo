@@ -1,6 +1,8 @@
-# 棠西村秘闻 · 七秒以后
+# 棠西村秘闻 · 九章网页版
 
-网页试玩发布包。打开发布后的网页，选择「从头开始」。无需账号。
+[进入九章完整版](https://qiyasxsx.github.io/tangxi-seven-seconds-demo/season/) · [单独游玩序章《七秒以后》](https://qiyasxsx.github.io/tangxi-seven-seconds-demo/first-take/)
+
+用手机或电脑打开网页，选择「从头开始」。游戏免登录，进度保存在当前浏览器。
 
 本仓库仅存放网页运行文件，不包含主工程、开发记录或凭据。
 

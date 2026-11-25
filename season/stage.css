@@ -1,0 +1,29 @@
+/* Keep the projected mist behind the speaker. These interiors take their colour
+   from their own practical light, so the outdoor lamp wash is unnecessary. */
+#stage:is([data-chapter="E03"], [data-chapter="E06"]) #lamplight {
+  background: radial-gradient(ellipse at 53% 45%, #89adc519, transparent 38%);
+}
+#stage[data-scene="E05-S02"] #air,
+#stage[data-scene="E05-S03"] #air {
+  opacity: .24;
+}
+#stage:is([data-scene="E00-S01"], [data-scene="E02-S01"],
+          [data-scene="E04-S04"], [data-scene="E05-S05"],
+          [data-scene="E07-S01"], [data-scene="E08-S05"],
+          [data-scene="E08-S06"], [data-scene="E08-S08"]) #air {
+  opacity: 0;
+}
+
+/* This is the awning foreground used by the alignment investigation, kept at
+   its solved position when the camera returns to the unobstructed playfield. */
+#stage[data-scene="E00-S02"][data-shot="卷闸在左"] #scenery::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 125%;
+  height: 138%;
+  background: url("props/awning-field.webp") center / 100% 100% no-repeat;
+  transform: translateX(-16.8%);
+  pointer-events: none;
+}

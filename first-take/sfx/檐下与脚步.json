@@ -1,0 +1,33 @@
+[
+  {
+    "id": "eaves",
+    "title": "檐下",
+    "author": "棠西村项目",
+    "seconds": 75,
+    "source": "原创配乐；20小节，64 BPM。工程使用本机 Logic Steinway 钢琴音源及原创的弓弦合成声部，仅交付混合母带。",
+    "scoreSource": "opening-night/tools/render-night-score.py",
+    "file": "eaves.m4a",
+    "sha256": "f4042a7f41a7cf73a7c269f8d726e5bdf82369ce42ee99dce72b277c41a52a90",
+    "loudnessLUFS": -20.3
+  },
+  {
+    "id": "step1",
+    "file": "step1.m4a",
+    "basedOn": "steps.ogg",
+    "credit": "Augmentality / Brandon Morris",
+    "license": "CC0",
+    "page": "https://opengameart.org/content/random-sounds-samples",
+    "edit": "highpass 150 Hz, lowpass 6000 Hz, transient compression 2:1",
+    "sha256": "7d1d9f39fff7db0b562a3353f8a994b9c0ed8cbec88ce96d50b5d86a15102457"
+  },
+  {
+    "id": "step2",
+    "file": "step2.m4a",
+    "basedOn": "steps.ogg",
+    "credit": "Augmentality / Brandon Morris",
+    "license": "CC0",
+    "page": "https://opengameart.org/content/random-sounds-samples",
+    "edit": "highpass 150 Hz, lowpass 6000 Hz, transient compression 2:1",
+    "sha256": "2d7bbf4879161bda94650dcf18133c4b53d071587b123d55e3212069a4342489"
+  }
+]
