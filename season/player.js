@@ -106,7 +106,6 @@
     $('chapterNo').textContent=c.scenes[0]===s.id?s.time+'　／　'+s.place:c.title+'　／　'+s.time;
     $('chapterName').textContent=c.scenes[0]===s.id?c.title:s.place;
     $('arrive').textContent=s.title;
-    $('enter').textContent=c.scenes[0]===s.id?'进入现场　›':'看向现场　›';
   }
   function visitSite(id) {
     closePanel();only('review');$('reviewSite').hidden=false;$('pause').hidden=true;
@@ -187,7 +186,7 @@
     $('resume').hidden=!valid(load(SAVE));only('home');
   }
   $('enter').onclick=async()=>{
-    if(transition)return;
+    if(transition||state?.phase!=='arrive'||$('notebook').open)return;
     if(state.scene==='E00-S03')await approach('shop');
     state.phase='read';render(true);
   };
