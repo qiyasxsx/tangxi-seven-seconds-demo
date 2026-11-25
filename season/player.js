@@ -262,4 +262,6 @@
   });
   document.addEventListener('visibilitychange',()=>{if(!document.hidden && state && !$('notebook').open)audio.pause(false)});
   preferences();home();
+  $('loading')?.setAttribute('hidden','');
+  $('start').hidden=false;
 })();
