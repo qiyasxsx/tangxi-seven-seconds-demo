@@ -1,6 +1,19 @@
 /* Keep the projected mist behind the speaker. These interiors take their colour
    from their own practical light, so the outdoor lamp wash is unnecessary. */
 #advance, #enter { -webkit-tap-highlight-color: transparent; }
+#stage[data-mode=advance][aria-busy=true]:has(#retryPlate[hidden])::after {
+  content: "正在载入画面…";
+  position: absolute;
+  right: 4%;
+  bottom: 4%;
+  z-index: 4;
+  pointer-events: none;
+  color: #e6e9da;
+  text-shadow: 0 1px 4px #081217;
+  font: 500 .85em var(--ui-copy);
+  animation: showFrameStatus 1ms step-end 900ms backwards;
+}
+@keyframes showFrameStatus { from { opacity: 0 } to { opacity: 1 } }
 
 #stage:is([data-chapter="E03"], [data-chapter="E06"]) #lamplight {
   background: radial-gradient(ellipse at 53% 45%, #89adc519, transparent 38%);
