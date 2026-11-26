@@ -29,6 +29,7 @@
   });
   // Local practical light and vapour share the coordinates of the painted object.
   const paintedEyelines={
+    'streets-cut-lunch':{'林雨':[40,12,23],'阿岑':[45,8,20]},
     'neighbors-cut-daughter-door':{'小梅':[32,11,25]},
     'neighbors-cut-father-table':{'福顺伯':[38,10,31],'林雨':[42,12,29]},
     'neighbors-cut-comes-back':{'姑娘':[36,13,29],'黄姨':[39,15,27]},
