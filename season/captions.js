@@ -4,6 +4,19 @@
   'use strict';
   const text=document.getElementById('utterance'),view=document.getElementById('advance');
   const actors=['near','far'].map(id=>document.getElementById(id));
+  const pages = line => {
+    const text=line.text, directed=window.SeasonCuts?.[line.id]?.pages;
+    if(directed && directed.join('')===text)return directed;
+    const parts=text.match(/[^。？！；…，、：]+[。？！；…，、：”」』）]*|[。？！；…，、：”」』）]+/gu)||[text];
+    const result=[];let page='';
+    for(const part of parts) {
+      if(page && [...page,...part].length>59){result.push(page);page=''}
+      if([...part].length>66){const chars=[...part];while(chars.length>59)result.push(chars.splice(0,59).join(''));page=chars.join('')}
+      else page+=part;
+    }
+    if(page)result.push(page);
+    return result;
+  };
   function between(y,h) {
     const bounds=[innerWidth*.045,innerWidth*.948];
     actors.forEach((rig,i)=>{
@@ -27,7 +40,13 @@
   function place() {
     text.style.removeProperty('left');text.style.removeProperty('top');text.style.removeProperty('width');
     if(view.hidden||view.dataset.layout!=='speech')return;
-    const right=document.getElementById('stage').dataset.focus==='right';
+    const stage=document.getElementById('stage');
+    if(stage.dataset.caption){
+      const [x,y,w]=stage.dataset.caption.split(',').map(Number);
+      Object.assign(text.style,{left:x+'%',top:y+'%',width:w+'%'});
+      return;
+    }
+    const right=stage.dataset.focus==='right';
     for(const yp of [.235,.16,.09,.33,.43,.055]) {
       const y=innerHeight*yp;let width=innerWidth*.332;
       for(let pass=0;pass<4;pass++) {
@@ -43,7 +62,7 @@
     }
     text.style.width='33%';text.style.left='35%';text.style.top='9%';
   }
-  window.SeasonCaptions={place};
+  window.SeasonCaptions={place,pages};
   for(const rig of actors)rig.querySelector('img').addEventListener('load',place);
   window.addEventListener('resize',place);document.fonts?.ready.then(place);
 })();

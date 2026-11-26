@@ -5,24 +5,14 @@
   const SAVE='tangxi.season.v1', PREFS=SAVE+'.prefs', LAST=SAVE+'.console';
   const panels=['home','slate','advance','choices','route','end'];
   let state, transition=false, showingChoices='', lostStorage=false, activeScene='';
-  const pages = text => {
-    const parts=text.match(/[^。？！；…，、：]+[。？！；…，、：”」』）]*|[。？！；…，、：”」』）]+/gu)||[text];
-    const result=[];let page='';
-    for(const part of parts) {
-      if(page && [...page,...part].length>59){result.push(page);page=''}
-      if([...part].length>66){const chars=[...part];while(chars.length>59)result.push(chars.splice(0,59).join(''));page=chars.join('')}
-      else page+=part;
-    }
-    if(page)result.push(page);
-    return result;
-  };
+  const pages=window.SeasonCaptions.pages;
   function load(key) {try{return JSON.parse(localStorage.getItem(key))}catch{return null}}
   function store(key,value) {
     try {localStorage.setItem(key,JSON.stringify(value))}
     catch {if(!lostStorage){lostStorage=true;notice('浏览器未允许本地存档，本次仍可继续游玩。')}}
   }
   function valid(s) {return !!(s && s.version===1 && book.scenes[s.scene] && Number.isInteger(s.beat) && s.beat>=0 && ['arrive','read','feedback','travel','end'].includes(s.phase) && Array.isArray(s.flags) && Array.isArray(s.log) && s.records)}
-  const fresh=()=>({version:1,scene:book.start,beat:0,page:0,phase:'arrive',selected:null,fb:0,flags:[],records:{},log:[],visited:[book.start]});
+  const fresh=()=>({version:1,edition:2,scene:book.start,beat:0,page:0,phase:'arrive',selected:null,fb:0,flags:[],records:{},log:[],visited:[book.start]});
   const prefs=Object.assign({mute:false,big:false,reduce:matchMedia('(prefers-reduced-motion: reduce)').matches},load(PREFS)||{});
   function preferences() {
     document.body.classList.toggle('big',prefs.big);
@@ -48,19 +38,33 @@
   }
   function remember(line) {
     const last=state.log.at(-1);
-    if(last?.id!==line.id || last.scene!==state.scene) state.log.push({scene:state.scene,id:line.id,speaker:line.speaker,text:line.text});
+    if(last?.id===line.id && last.scene===state.scene){last.text=line.text;last.speaker=line.speaker}
+    else state.log.push({scene:state.scene,id:line.id,speaker:line.speaker,text:line.text});
   }
-  function permitted(rule) {return !rule || (Array.isArray(rule)?rule:[rule]).every(id=>state.flags.includes(id))}
+  function permitted(rule, alternatives={}) {
+    return !rule || (Array.isArray(rule)?rule:[rule]).every(id=>
+      state.flags.includes(id) || alternatives[id]?.some(other=>state.flags.includes(other)));
+  }
   function displayLine(line,audible) {
-    const chunks=pages(line.text);
+    const chunks=pages(line);
     state.page=Math.max(0,Math.min(state.page,chunks.length-1));
-    only('advance');remember(line);
-    const read=history(), visible=chunks.slice(0,state.page+1).join('');
-    read[read.length-1]={...read.at(-1),text:visible};
-    const layout=direction.compose(scene(),{...line,text:visible},read,audible);
+    only('advance');
+    const visible=chunks.slice(0,state.page+1).join('');
+    remember({...line,text:visible});
+    const read=history();
+    const layout=direction.compose(scene(),{...line,text:visible},read,audible,state.page);
     $('advance').dataset.layout=layout;
+    if(state.page+1<chunks.length)direction.warm(scene(),line,state.page+1);
+    else {
+      const next=state.phase==='feedback'?optionAt()?.feedback[state.fb+1]:scene().beats[state.beat+1];
+      if(next?.type==='line' && permitted(next.when))direction.warm(scene(),next);
+    }
     $('speaker').textContent=({'旁白':'','动作':'','片尾':'','声画':''})[line.speaker]??line.speaker;
-    $('words').textContent=chunks[state.page];window.SeasonCaptions.place();
+    $('words').textContent=chunks[state.page];
+    if(line.id==='E07-S05.b05' && state.page===3)
+      $('words').setAttribute('aria-label',chunks[state.page]+' 可公开的是门轴；照护簿仅供核对；改衣局部照已经取回。');
+    else $('words').removeAttribute('aria-label');
+    window.SeasonCaptions.place();
     $('nextHint').textContent=chunks.length>1?(state.page+1)+' / '+chunks.length+'　⌄':'继续　⌄';
   }
   function optionAt() {return beat()?.options?.find(o=>o.id===state.selected)}
@@ -75,7 +79,7 @@
   function selectOption(i) {
     if(transition||$('notebook').open || state.phase!=='read')return;
     const item=beat(),o=item?.options?.[i];
-    if(!o || !permitted(o.requires) || state.flags.includes(o.id) || state.missed?.includes(o.id))return;
+    if(!o || !permitted(o.requires,o.alternatives) || state.flags.includes(o.id) || state.missed?.includes(o.id))return;
     state.phase='feedback';state.selected=o.id;state.fb=0;state.page=0;
     only('advance');render(true);
   }
@@ -83,7 +87,12 @@
     only('choices');
     if(showingChoices===item.id)return;
     showingChoices=item.id;
-    const opts=item.options.map(o=>({id:o.id,label:o.label,disabled:!permitted(o.requires)||state.missed?.includes(o.id),lockReason:state.missed?.includes(o.id)?'已经核过这处':o.lockReason||''}));
+    function reason(o) {
+      if (!o.requires) return '';
+      const needed=o.requires.filter(id=>!permitted(id,o.alternatives));
+      return needed.map(id=>o.alternatives?.[id]?'还缺一份街坊可查的署名说明':'还未接下无齿坯和四周的值班').join('；');
+    }
+    const opts=item.options.map(o=>({id:o.id,label:o.label,disabled:!permitted(o.requires,o.alternatives)||state.missed?.includes(o.id),lockReason:state.missed?.includes(o.id)?'已经核过这处':reason(o)}));
     if(window.SeasonInvestigation?.render($('choices'),scene().id,item.prompt,opts,selectOption))return;
     const heading=document.createElement('h2');heading.textContent=item.prompt;
     $('choices').replaceChildren(heading);
@@ -101,18 +110,18 @@
     if(id==='E08-S03')store(LAST,state);
   }
   function arrival(s) {
-    const c=chapter();only('slate');
+    const c=chapter(),mark=direction.arrivalCard(s);only('slate');
     $('slate').classList.toggle('smallArrival',c.scenes[0]!==s.id);
-    $('chapterNo').textContent=c.scenes[0]===s.id?s.time+'　／　'+s.place:c.title+'　／　'+s.time;
-    $('chapterName').textContent=c.scenes[0]===s.id?c.title:s.place;
+    $('chapterNo').textContent=c.scenes[0]===s.id?mark.time+'　／　'+mark.place:c.title+'　／　'+mark.time;
+    $('chapterName').textContent=c.scenes[0]===s.id?c.title:mark.place;
     $('arrive').textContent=s.title;
   }
   function visitSite(id) {
     closePanel();only('review');$('reviewSite').hidden=false;$('pause').hidden=true;
-    const target=book.scenes[id];direction.prepare(target);
-    $('reviewTime').textContent='现场回想　／　'+target.time;
-    $('reviewName').textContent=target.place;
-    $('reviewNote').textContent=window.TX_SITES[id]?.[3]||target.title;
+    const target=book.scenes[id],shot=direction.prepare(target,true);
+    $('reviewTime').textContent='现场回想　／　'+(shot.date||target.time);
+    $('reviewName').textContent=shot.place||target.place;
+    $('reviewNote').textContent=shot.note||window.TX_SITES[id]?.[3]||target.title;
     $('reviewDone').onclick=()=>{activeScene='';render()};
   }
   function siteMarkers() {
@@ -133,7 +142,6 @@
     for(;;){
       const s=scene();
       if(activeScene!==s.id){activeScene=s.id;direction.prepare(s)}
-      $('calendar').textContent=s.time;$('locationName').textContent=s.place;
       if(state.phase==='arrive'){arrival(s);siteMarkers();break}
       if(state.phase==='end'){
         only('end');$('endingTitle').textContent=s.title.replace(/^结局.　/,'');
@@ -141,7 +149,8 @@
       }
       if(state.phase==='travel'){
         only('route');direction.travel(s);const next=book.scenes[state.nextScene||s.next];
-        $('route').textContent=(s.place===next.place?'留在':'前往')+'　'+next.place;break
+        const destination=direction.arrivalCard(next).place;
+        $('route').textContent=($('locationName').textContent===destination?'留在':'前往')+'　'+destination;break
       }
       if(state.phase==='feedback'){
         const f=optionAt()?.feedback[state.fb];
@@ -157,7 +166,8 @@
       }
       if(b.type==='end'){state.phase='end';continue}
       if(b.type==='interaction'){
-        const prior=history();direction.compose(s,prior.at(-1),prior);choose(b);break
+        const prior=history(),last=prior.at(-1);
+        direction.compose(s,last,prior,false,last?pages(last).length-1:0,b);choose(b);break
       }
       if(b.type==='line'){displayLine(b,audible);break}
       throw Error('未知演出类型 '+b.type);
@@ -171,20 +181,34 @@
     finally {transition=false;$('stage').classList.remove('approaching')}
   }
   async function advance() {
-    if(transition||$('notebook').open||!state||$('advance').hidden)return;
+    if(transition||$('stage').getAttribute('aria-busy')==='true'||$('notebook').open||!state||$('advance').hidden)return;
     const line=state.phase==='feedback'?optionAt()?.feedback[state.fb]:beat();
     if(!line)return;
-    if(++state.page>=pages(line.text).length){state.page=0;if(state.phase==='feedback')state.fb++;else state.beat++}
+    if(++state.page>=pages(line).length){state.page=0;if(state.phase==='feedback')state.fb++;else state.beat++}
     if(state.scene==='E01-S05' && state.phase==='read' && state.page===0 && beat()?.id==='E01-S05.b08')await approach('hall');
     render(true);
   }
   function run(saved) {
+    // Original saves hold an ordinal. Follow the previous beat past any added
+    // dialogue, including feedback and the saved return to the broadcast desk.
+    if(!saved.edition){
+      const sequence=book.scenes[saved.scene].beats;
+      const prior=sequence.filter(b=>!b.pickup);
+      const event=prior[saved.beat];
+      saved.beat=event?sequence.indexOf(event):sequence.length;
+      saved.edition=2;
+    }
     closePanel();state=saved;activeScene='';showingChoices='';audio.start();preferences();render();
   }
   function home(){
     activeScene='';transition=false;state=null;audio.pause(true);window.SeasonFoley.quiet();
     $('resume').hidden=!valid(load(SAVE));only('home');
   }
+  $('stage').addEventListener('retryframe',()=>{
+    if(!state)return;
+    if(state.phase==='arrive' || state.phase==='travel')direction.prepare(scene());
+    render(true);
+  });
   $('enter').onclick=async()=>{
     if(transition||state?.phase!=='arrive'||$('notebook').open)return;
     if(state.scene==='E00-S03')await approach('shop');
@@ -245,6 +269,7 @@
       openPanel('音乐与制作');
       paragraph('《棠西村秘闻》　夜访','外拍手绘互动小说');
       paragraph('蒸汽、水流与退水　／　rubberduck','OpenGameArt · CC0 · 水声录音剪辑。铁牌取自《七秒以后》原敲击。');
+      paragraph('网吧键鼠、硬币、椅脚与硬盘','使用项目收录的 CC0 钥匙、台面、踏步和开关录音重新剪接。');
       paragraph('Dark Walk　／　Kevin MacLeod','Incompetech · CC BY 4.0 · 游戏内裁切、循环及混音');
       for(const [text,url] of [['配乐作者','https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100468'],['CC BY 4.0 授权','https://creativecommons.org/licenses/by/4.0/']]){
         const a=document.createElement('a');a.textContent=text;a.href=url;a.target='_blank';a.rel='noopener';$('panelBody').append(a,document.createTextNode('　'));

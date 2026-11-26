@@ -9,6 +9,7 @@
     road:    {rain:.38,  street:.22,  fan:0,   score:.31},
     outside: {rain:.47,  street:.07,  fan:0,   score:.27},
     hall:    {rain:.12,  street:.015, fan:0,   score:.32},
+    cafe:    {rain:.04,  street:0,    fan:.18, score:.16},
     room:    {rain:.055, street:0,    fan:0,   score:.22},
     shop:    {rain:.09,  street:.025, fan:.24, score:.26}
   };
