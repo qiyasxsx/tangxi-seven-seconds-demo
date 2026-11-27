@@ -14,7 +14,7 @@
     shop:    {rain:.09,  street:.025, fan:.24, score:.26}
   };
   let started = false, muted = false, paused = false, zone = "road";
-  let field = null, nextField = 0, streetTurn = 0;
+  let field = null, nextField = 0, streetTurn = 0, fieldAllowed = true;
 
   for (const name of ["rain", "street", "fan", ...(config.score ? ["score"] : [])]) {
     const audio = new Audio(name === "score" ? config.score : dir + name + ".m4a");
@@ -61,7 +61,7 @@
       if (target > 0 && audio.paused && !audio.error) play(audio);
       if (!target && !audio.volume && !audio.paused) audio.pause();
     }
-    if (!config.field || field || performance.now() < nextField) return;
+    if (!config.field || !fieldAllowed || field || performance.now() < nextField) return;
     if (zone === "shop") playField("scan");
     else if (zone === "road" || zone === "outside") {
       const cues = ["lane-talk", "far-dog", "market-call"];
@@ -83,6 +83,12 @@
     pause(value) {
       paused = value;
       if (value) quiet(); else { planField(3.4); mix(); }
+    },
+    fieldAllowed(value) {
+      if (fieldAllowed === value) return;
+      fieldAllowed = value;
+      if (value) planField(5);
+      else clearField();
     },
     zone(name) {
       if (!gains[name] || name === zone) return;

@@ -5,8 +5,8 @@
   const text=document.getElementById('utterance'),view=document.getElementById('advance');
   const actors=['near','far'].map(id=>document.getElementById(id));
   const pages = line => {
-    const text=line.text, directed=window.SeasonCuts?.[line.id]?.pages;
-    if(directed && directed.join('')===text)return directed;
+    const text=line.text, explicit=line.pages;
+    if(Array.isArray(explicit) && explicit.join('')===text)return explicit;
     const parts=text.match(/[^。？！；…，、：]+[。？！；…，、：”」』）]*|[。？！；…，、：”」』）]+/gu)||[text];
     const result=[];let page='';
     for(const part of parts) {
@@ -41,6 +41,9 @@
     text.style.removeProperty('left');text.style.removeProperty('top');text.style.removeProperty('width');
     if(view.hidden||view.dataset.layout!=='speech')return;
     const stage=document.getElementById('stage');
+    // Phone text has a physical, portrait container.  Its CSS coordinates are
+    // the phone screen rather than an empty patch between two actor silhouettes.
+    if(stage.dataset.phone==='on')return;
     if(stage.dataset.caption){
       const [x,y,w]=stage.dataset.caption.split(',').map(Number);
       Object.assign(text.style,{left:x+'%',top:y+'%',width:w+'%'});

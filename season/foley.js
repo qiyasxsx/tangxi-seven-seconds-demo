@@ -1,10 +1,13 @@
 (() => {
   'use strict';
   const local={
-    'E01-S03.b10':['pot',.30], 'E02-S02.b07':['pot',.21],
+    'E01-S03.b10':['pot',.30], 'E02-S02.b05':['pot',.21],
     'E04-S01.b01':['pot',.32], 'E05-S02.b01':['seep',.13],
     'E06-S02.b01':['seep',.31],
-    'E08-S02.b07':['one-strike',.37], 'E08-S04.b08':['one-strike',.48]
+    'E03-S05.b07.o1.f2':['cafe-mouse-four',.27],
+    'E03-S05.b07.o2.f2':['cafe-mouse-four',.27], 'E03-S05.b12':['cafe-chair',.22],
+    'E03-S05.b17':['cafe-drive',.22], 'E06-S04.b06':['drain',.25],
+    'E08-S02.b06':['one-strike',.37], 'E08-S04.b08':['one-strike',.48]
   };
   let active=null,muted=false;
   function quiet(){if(active){active.pause();active=null}}

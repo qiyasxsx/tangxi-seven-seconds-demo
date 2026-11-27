@@ -7,12 +7,12 @@
     zone, place: label, ...(note ? {note} : {}),
   });
   window.SeasonRevisits = {
-    'E00-S01': place('editing-lunch', 'room', '剪辑桌 · 窗边'),
-    'E00-S02': place('factory-arch', 'road', '牌楼 · 雨棚外'),
+    'E00-S01': place('@stop', 'road', '旧厂牌楼 · 村口', '从缺角砖抬头，棚沿还挡着便利店的窄门。'),
+    'E00-S02': place('@stop', 'road', '牌楼 · 雨棚外'),
     'E00-S03': place('@shopClosed', 'outside', '今宵便利 · 沿街铺面'),
     'E00-S04': place('bus-stop', 'road', '公交站 · 候车棚'),
 
-    'E01-S01': place('factory-arch', 'road', '三巷铁牌旁'),
+    'E01-S01': place('@stop', 'road', '三巷铁牌旁'),
     'E01-S02': place('freezer', 'shop', '便利店 · 冰柜边'),
     'E01-S03': place('@shop', 'outside', '今宵便利 · 侧门外'),
     'E01-S04': place('empty-plate', 'outside', '粉摊 · 檐下方桌'),

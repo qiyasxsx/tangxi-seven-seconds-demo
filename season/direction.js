@@ -17,6 +17,42 @@
   const publicPose = new Set(['linFrontListen','linBackListen','qinStanding','xuStanding']);
   const media = /^(手机|旧带|录音|窗后声音|阿岑的语音)/;
   const narrator = /^(旁白|片尾|动作|声画)$/;
+  // A master is the place the reader should still recognise after the text is
+  // covered.  It is deliberately separate from the exceptional inserts below:
+  // a phone, a hand at the side door, or a subjective check may cut away, but
+  // ordinary replies never buy a new all-figure illustration.
+  //
+  // E00 is the proved template for the rest of the season.  `stop` and `shop`
+  // are the approved field plates: the warm sign, green shutter and wet lane
+  // are the shared objects that make the long shot and shop-front one place.
+  const continuity = {
+    'E00-S01': {
+      key:'arch', bg:shared+'stop.webp', zone:'road', place:'棠西村口 · 旧厂牌楼',
+      near:'linFrontListen', far:null, pan:0, focus:'left',
+      phone: line => media.test(line?.speaker||'') || /\.b08\./.test(line?.id||'')
+    },
+    'E00-S02': {
+      key:'arch', bg:shared+'stop.webp', zone:'road', place:'棠西村口 · 旧厂牌楼',
+      near:'linFrontListen', far:null, pan:0, focus:'left',
+      inserts:{
+        'E00-S02.b04':{bg:'art/streets-cut-twine.webp',near:null,far:null,view:'林雨所见'},
+        'E00-S02.b07.o2.f1':{bg:'props/alley-empty.webp',near:null,far:null,view:'阿岑所见',pan:0},
+        'E00-S02.b08':{bg:'props/alley-empty.webp',near:null,far:null,view:'阿岑所见',pan:0},
+        'E00-S02.b09':{bg:'art/retake-arch-fingertips.webp',near:null,far:null,view:'阿岑所见',pan:0}
+      }
+    },
+    'E00-S03': {
+      key:'shop', bg:shared+'shop.webp', zone:'shop', place:'今宵便利 · 沿街铺面',
+      near:'linBackListen', far:'qinStanding',
+      inserts:{
+        // The only early cut-away: it proves which narrow door is being
+        // discussed, then the next ordinary reply returns to the shared plate.
+        'E00-S03.b02':{bg:'art/streets-cut-crate.webp',near:null,far:null,pan:0},
+        'E00-S03.b06':{bg:shared+'side.webp', near:null, far:null, actors:false,
+          view:'林雨所见', pan:0, focus:'left', cut:'insert'}
+      }
+    }
+  };
   let sceneId='', requested='', generation=0, active=0, lastCue='', lastFoley='';
   const reduced = ()=>document.body.classList.contains('reduce');
   function sceneArt(scene) {
@@ -40,7 +76,7 @@
   const practicals={
     'cafe-cut-seated':['crt',48,37,15,18],
     'cafe-cut-four-friends':['crt',48,37,15,18],
-    'umbrella-cut-stove':['steam',19,41,7,15],
+    'retake-umbrella-stove':['steam',5,53,6,12],
     'streets-cut-second-bite':['steam',13,37,7,14],
     'flood-cut-ebb':['puddle',64,83,32,6],
     'neighbors-cut-father-daughter':['porcelain',48,61,5,12]
@@ -95,15 +131,37 @@
   function framing(scene,line,page=0) {
     const cuts=window.SeasonCuts||{};
     const id=line?.id;
-    const entry=id && cuts[id],part=id && cuts[id+'~'+page];
-    return {...cuts[scene.id],...entry,...part};
+    const entries=[cuts[scene.id], id && cuts[id], id && cuts[id+'~'+page]];
+    const shot={};
+    for(const entry of entries){
+      if(!entry)continue;
+      // A replacement plate owns its props. An incremental change of focus,
+      // caption or sound keeps the layers on the plate already in the lens.
+      if(entry.bg)Object.assign(shot,{layers:[],near:null,far:null});
+      Object.assign(shot,entry);
+    }
+    return shot;
+  }
+  function continuityFrame(scene,line,base,shot={}) {
+    const rule=continuity[scene.id];
+    if(!rule)return {cut:base,shot,rule:null,phone:false};
+    const insert=rule.inserts?.[line?.id];
+    if(insert) {
+      const cut={...base,...insert};
+      return {cut,shot:{...shot,bg:insert.bg,actors:false},rule,phone:false};
+    }
+    // Keep the camera on the scene master for dialogue, choice feedback and
+    // resume.  Explicit insert records above remain the only way to break it.
+    const {inserts,phone,...master}=rule;
+    const cut={...base,...master,layers:undefined,cut:'master'};
+    return {cut,shot:{...shot,bg:master.bg,actors:true},rule,phone:!!phone?.(line)};
   }
   // While the player reads, request the next known plate at low priority.
   // Decisions keep their possible replies unloaded until the player commits.
   const warmed=new Set();
   function warm(scene,line,page=0) {
     if(!line || navigator.connection?.saveData)return;
-    const cut=framing(scene,line,page);
+    const cut=continuityFrame(scene,line,framing(scene,line,page)).cut;
     for(const src of [cut.bg,...(cut.layers||[]).map(l=>l.src)]){
       if(!src || src===requested || warmed.has(src))continue;
       warmed.add(src);
@@ -158,11 +216,15 @@
     composition++;
     const fresh=sceneId!==scene.id;
     if(fresh){window.SeasonDoorway.clear();sceneId=scene.id;lastCue='';lastFoley='';showActor(near);showActor(far)}
-    const cut=(revisit && window.SeasonRevisits?.[scene.id]) || framing(scene);
+    let cut=(revisit && window.SeasonRevisits?.[scene.id]) || framing(scene);
+    // A revisit is evidence of the original location, so leave its intentionally
+    // empty plate alone.  Normal entry starts on the declared master.
+    if(!revisit)cut=continuityFrame(scene,null,cut).cut;
     if(revisit){showActor(near);showActor(far)}
     const zone=cut.zone||acoustic(scene.place);
     stage.dataset.chapter=scene.chapter;
     stage.dataset.scene=scene.id;
+    window.passageSound.fieldAllowed(scene.id!=='E01-S03');
     roomTone(zone);locationCard(scene,cut);
     stage.dataset.mood=cut.mood||'';stage.dataset.moment='';stage.dataset.frame='';
     const art=sceneArt(scene);
@@ -177,13 +239,20 @@
   }
   function compose(scene,line,history,playCue=false,page=0,decision=null) {
     const turn=++composition;
-    const shot=recordShot(scene,history,page), text=line?.text || '', name=line?.speaker || '';
-    const cut=framing(scene,line,page);
-    if(decision)Object.assign(cut,window.SeasonCuts?.[decision.id]);
+    let shot=recordShot(scene,history,page), text=line?.text || '', name=line?.speaker || '';
+    let cut=framing(scene,line,page);
+    if(decision){
+      const setup=window.SeasonCuts?.[decision.id];
+      if(setup?.bg)Object.assign(cut,{layers:[],near:null,far:null});
+      Object.assign(cut,setup);
+    }
+    const held=continuityFrame(scene,line,cut,shot);
+    cut=held.cut;shot=held.shot;
     const picture=cut.bg||shot.bg;
     const anchor=paintedEyelines[picture?.split('/').pop()?.replace(/\.webp$/,'')]?.[name];
     if(!decision && anchor && !cut.caption && !cut.layout){cut.caption=anchor;cut.pan??=(name==='林雨'?1:-1)}
     paint(picture,cut.layers);
+    window.passageSound.fieldAllowed(scene.id!=='E01-S03' && !(scene.id==='E01-S02' && cut.zone==='outside'));
     roomTone(cut.zone||acoustic(scene.place));
     locationCard(scene,cut);
     stage.dataset.frame=line?.id||'';
@@ -195,7 +264,17 @@
 
     if(cut.moment!==undefined)stage.dataset.moment=cut.moment;
     const replay=scene.id==='E00-S01' && line?.id.includes('.b08.o');
-    document.getElementById('phoneReplay').hidden=!replay;
+    const phoneUI=held.phone || replay;
+    const directMessage=phoneUI && /店家的儿子|水果头像/.test(name);
+    stage.dataset.medium=phoneUI?(directMessage?'inbox':'clip'):cut.view==='机内回放'?'playback':'';
+    if(phoneUI){
+      const phone=document.getElementById('phoneReplay');
+      phone.querySelector('i').textContent=directMessage?'‹　私信　·　'+name.split('·').pop():replay?'‹　投稿原件':'‹　夜访　／　作品';
+      phone.querySelector('small').textContent=directMessage?'发消息…':'00:07　━━━━━━　00:07';
+    }
+    stage.dataset.continuity=held.rule?.key||'';
+    stage.dataset.phone=phoneUI?'on':'';
+    document.getElementById('phoneReplay').hidden=!phoneUI;
     const recent=history.filter(l=>l.speaker!=='片尾');
     let counterpart='';
     for (const l of recent) {
@@ -239,16 +318,17 @@
     camera(cut.pan??(layout==='speech' && (left||right)?(lookingRight?-5.55:5.55):0));
     stage.dataset.shot=shot.at || 'establish';
     const soundPage=window.SeasonCuts?.[line?.id+'~'+page];
-    const cueId=soundPage?.cue ? line.id+'~'+page : line?.id;
+    const cueId=soundPage?.cue || line?.id==='E06-S04.b01' ? line.id+'~'+page : line?.id;
     if(playCue && line && lastCue!==cueId)frameReady.then(visible=>{
       if(!visible||turn!==composition||stage.dataset.mode!=='advance')return;
       if(lastFoley!==line.id){window.SeasonFoley.perform(line);lastFoley=line.id}
-      const cue=cut.cue!==undefined?cut.cue:/三响|敲三下|铁牌连响/.test(text)?'iron-three':/提手比盖沿|柜盖响/.test(text)?'freezer-lid':
+      const contact=line.id==='E06-S04.b01' ? ['keys','latch'][page] : null;
+      const cue=cut.cue!==undefined?cut.cue:contact||(/三响|敲三下|铁牌连响/.test(text)?'iron-three':/提手比盖沿|柜盖响/.test(text)?'freezer-lid':
         /锁舌退出|门闩落下/.test(text)?'latch':/钥匙响|钥匙串轻轻/.test(text)?'keys':
-        /纸袋.*滑|折好转交清单|撕下回单/.test(text)?'paper':/电视.*雪花/.test(text)?'tv-noise':null;
+        /纸袋.*滑|折好转交清单|撕下回单/.test(text)?'paper':/电视.*雪花/.test(text)?'tv-noise':null);
       if(cue){lastCue=cueId;if(!window.SeasonFoley.contact(cue))window.passageSound.play(cue)}
     });
-    if(replay)return 'replay';
+    if(replay)return 'message';
     if(cut.layout)return cut.layout;
     if(cut.caption && layout==='speech')return 'speech';
     if(name==='阿岑' || (layout==='speech' && (!left&&!right || !cast[name])))return 'offscreen';

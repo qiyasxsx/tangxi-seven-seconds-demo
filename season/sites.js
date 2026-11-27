@@ -1,7 +1,7 @@
 // Coordinates point to an everyday feature visible before the interviews.
 // Looking is optional; it never grants a witness release or advances a decision.
 window.TX_SITES={
- 'E00-S01':[53,62,'看看剪辑桌','两份外拍盒饭挨着剪辑键盘。阿岑把筷子搁在自己的那份上。'],
+ 'E00-S01':[73,47,'抬头看灯牌','巷底有一扇绿卷闸。它右边还透着光，隔着头顶的棚沿，看不清那里够不够一个人走。'],
  'E00-S02':[50,37,'抬头看雨棚','站在棚下再抬头，最靠里的那截街面正好在视线外。'],
  'E00-S03':[77,48,'看店门','门边留的那条窄道只够一个人侧身。要搬箱水，就得请门口的人让一让。'],
  'E00-S04':[51,45,'看站牌','往城里的车从牌楼外面过。站在这里，店里的叫号已经听不清了。'],

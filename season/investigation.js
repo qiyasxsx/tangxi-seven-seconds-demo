@@ -461,10 +461,11 @@
     "E07-S04":directions,"E08-S04":witness
   };
 
-  function render(host,sceneId,prompt,options,onSelect) {
+  function render(host,sceneId,item,options,onSelect) {
     clear();
     const build = scenes[sceneId];
-    if (!build || (sceneId==="E07-S04" && !prompt.includes("指引"))) return false;
+    if (!build || (sceneId==="E07-S04" && item.kind!=="retry")) return false;
+    const prompt=item.prompt;
     host.replaceChildren();
     const root = node("section","sx-investigation",host);
     root.dataset.scene=sceneId;

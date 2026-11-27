@@ -10,49 +10,15 @@
   });
 
   const art = {
-    'E00-S01': scene('editing-lunch', [64, 46], [
-      shot('E00-S01.b08.o1.f1', '@clipBefore', false),
-      shot('E00-S01.b08.o2.f1', '@clipBefore', false),
-      shot('E00-S01.b09', 'editing-lunch'),
-    ]),
-    'E00-S02': scene('factory-arch', [71, 55], [
-      shot('E00-S02.b07.o1.f1', '@shop', false),
-      {at: 'E00-S02.b07.o2.f1', bg: 'props/alley-empty.webp', actors: false},
-      shot('E00-S02.b09', '@shop'),
-    ]),
-    'E00-S03': scene('@shop', [82, 54], [
-      shot('E00-S03.b06', '@side', false),
-      shot('E00-S03.b09', '@shop'),
-    ]),
-    'E00-S04': scene('bus-stop', [75, 54], [
-      shot('E00-S04.b09', 'night-bus', false),
-    ]),
-    'E01-S01': scene('factory-arch', [75, 56], [
-      shot('E01-S01.b08', '@shop'),
-      shot('E01-S01.b11', 'rice-stall'),
-    ]),
-    'E01-S02': scene('freezer', [75, 53], [
-      shot('E01-S02.b03', 'bus-stop'),
-      shot('E01-S02.b06', 'umbrella-shelter', false),
-    ]),
-    'E01-S03': scene('umbrella-shelter', [66, 48], [
-      shot('E01-S03.b02', 'umbrella-strike', false),
-      shot('E01-S03.b04', '@shop'),
-      shot('E01-S03.b05', 'empty-plate', false),
-      shot('E01-S03.b07', 'freezer'),
-      shot('E01-S03.b10', '@stop', false),
-    ], false),
-    'E01-S04': scene('rice-stall', [62, 56], [
-      shot('E01-S04.b07', 'empty-plate', false),
-      shot('E01-S04.b09', 'rice-stall'),
-    ]),
-    'E01-S05': scene('freezer', [65, 50], [
-      shot('E01-S05.b03', 'empty-bag', false),
-      shot('E01-S05.b05', 'zheng-front'),
-      shot('E01-S05.b08', '@hallLit'),
-      shot('E01-S05.b11', '@room'),
-      shot('E01-S05.b12', 'dining-reflection', false),
-    ]),
+    'E00-S01': scene('@stop', [72,49]),
+    'E00-S02': scene('@stop', [72,49]),
+    'E00-S03': scene('@shop', [81,54]),
+    'E00-S04': scene('bus-stop', [75,54]),
+    'E01-S01': scene('@stop', [72,49]),
+    'E01-S02': scene('freezer', [76,52]),
+    'E01-S03': scene('@shopClosed', [74,52], [], false),
+    'E01-S04': scene('rice-stall', [63,57]),
+    'E01-S05': scene('freezer', [72,52]),
     'E02-S01': scene('zheng-front', [50, 63], [
       shot('E02-S01.b01', 'four-buns', false),
       shot('E02-S01.b05', 'zheng-front'),
@@ -109,7 +75,7 @@
       shot('E04-S04.b10', '@hallLit'),
     ]),
     'E05-S01': scene('rental-desk', [61, 52], [
-      shot('E05-S01.b06', 'wet-workwear'),
+      shot('E05-S01.b07', 'wet-workwear'),
     ]),
     'E05-S02': scene('wet-workwear', [68, 49], [
       shot('E05-S02.b06', 'delivery-windows', false),
@@ -117,59 +83,54 @@
     'E05-S03': scene('delivery-windows', [72, 49], [
       shot('E05-S03.b08', 'wet-workwear', false),
     ], false),
-    'E05-S04': scene('wet-workwear', [22, 50], [
-      shot('E05-S04.b08', 'wet-workwear'),
-    ]),
+    'E05-S04': scene('rental-desk', [22, 50]),
     'E05-S05': scene('morning-meal', [66, 54]),
     'E06-S01': scene('high-window', [52, 54]),
     'E06-S02': scene('cellar-glass', [56, 48], [
-      shot('E06-S02.b03~1', 'flood-landing'),
+      shot('E06-S02.b03', 'cellar-glass'),
     ]),
     'E06-S03': scene('flood-landing', [63, 50], [
       shot('E06-S03.b04', 'cellar-glass', false),
-      shot('E06-S03.b05', 'cellar-glass'),
-      shot('E06-S03.b08', 'flood-landing'),
+      shot('E06-S03.b08', 'flood-cut-aliang', false),
     ]),
-    'E06-S04': scene('flood-landing', [73, 52], [
-      shot('E06-S04.b02', 'gate-open', false),
-      shot('E06-S04.b06', 'cellar-glass', false),
-      shot('E06-S04.b09~1', '@hallLit'),
-      shot('E06-S04.b12', 'dry-table', false),
+    'E06-S04': scene('gate-open', [73, 52], [
+      shot('E06-S04.b01~0', 'flood-cut-key-pass', false),
+      shot('E06-S04.b01~1', 'flood-cut-unlock', false),
+      shot('E06-S04.b01~2', 'flood-cut-first-out', false),
+      shot('E06-S04.b01~3', 'flood-cut-catch', false),
+      shot('E06-S04.b02', 'flood-cut-first-out', false),
+      shot('E06-S04.b03', 'flood-cut-aliang', false),
+      shot('E06-S04.b04', 'flood-cut-fifth-bed', false),
+      shot('E06-S04.b06~0', 'flood-cut-bucket', false),
+      shot('E06-S04.b06~1', 'flood-cut-towel', false),
+      shot('E06-S04.b11', 'dry-table', false),
     ]),
     'E07-S01': scene('old-shops', [53, 51]),
-    'E07-S02': scene('cobbler', [62, 57], [
-      shot('E07-S02.b05', 'old-shops'),
-    ]),
+    'E07-S02': scene('cobbler', [62, 57]),
     'E07-S03': scene('tailor', [58, 53]),
     'E07-S04': scene('key-counter', [57, 55], [
       shot('E07-S04.b07', 'key-counter', false),
     ]),
-    'E07-S05': scene('rice-stall', [61, 52], [
-      shot('E07-S05.b05~2', '@playback', false),
-    ]),
+    'E07-S05': scene('rice-stall', [61, 52]),
     'E08-S01': scene('outdoor-set', [56, 53]),
     'E08-S02': scene('audience', [65, 54], [
       shot('E08-S02.b07', 'witness-visitors', false),
     ]),
-    'E08-S03': scene('outdoor-set', [57, 54], [
-      shot('E08-S03.b01~1', 'channel-control'),
-    ]),
+    'E08-S03': scene('outdoor-set', [57, 54]),
     'E08-S04': scene('witness-table', [50, 53], [
-      shot('E08-S04.b04~1', 'witness-table', false),
       shot('E08-S04.b08', 'audience', false),
     ]),
     'E08-S05': scene('after-show', [69, 56], [
-      shot('E08-S05.b02', '@room'),
+      shot('E08-S05.b01~1', '@room'),
     ]),
     'E08-S06': scene('bus-leaving', [52, 52], [
-      shot('E08-S06.b05', 'bus-leaving', false),
+      shot('E08-S06.b04~1', 'broadcast-cut-away-call', false),
     ]),
-    'E08-S07': scene('archive-lamp', [56, 53], [
-      shot('E08-S07.b06~1', 'archive-lamp', false),
-    ]),
+    'E08-S07': scene('archive-lamp', [56, 53]),
     'E08-S08': scene('new-kitchen', [56, 53], [
-      shot('E08-S08.b02', '@shop'),
-      shot('E08-S08.b03', 'new-kitchen'),
+      shot('E08-S08.b01~1', 'new-kitchen'),
+      shot('E08-S08.b02~0', '@shop'),
+      shot('E08-S08.b02~1', 'new-kitchen'),
       shot('E08-S08.b04', 'microwave', false),
     ]),
   };
