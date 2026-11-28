@@ -1,0 +1,221 @@
+/* The cutouts share a 640 × 960 register. Place their eyes and soles in the
+   shot before moving them for parallax. The shoulder plate ends at the waist. */
+:root {
+  color-scheme: dark;
+  --night: #0d191e;
+  --paper: #f0eddd;
+  --silver: #b7c8be;
+  --print: var(--ui-serif, 'Songti SC', serif);
+  --copy: var(--ui-copy, 'STKaiti', serif);
+  --sans: var(--ui-sans, 'PingFang SC', sans-serif);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; }
+body { display: grid; place-items: center; overflow: hidden; color: var(--paper); background: #080e12; font: 16px/1.5 var(--sans); }
+[hidden] { display: none !important; }
+button { color: inherit; background: none; border: 0; border-radius: 0; padding: 0; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+button:focus-visible, input:focus-visible { outline: 2px solid #f0d5a5; outline-offset: 4px; }
+button:disabled { cursor: default; opacity: .48; }
+#stage {
+  --word-size: clamp(22px, 2.02cqw, 36px);
+  position: relative; isolation: isolate; container-type: size; overflow: hidden;
+  width: min(100vw, 177.7778vh); aspect-ratio: 16 / 9; background: var(--night);
+}
+#stage.large { --word-size: clamp(27px, 2.47cqw, 43px); }
+#world, .frame, .plate, .foreground, #shutter, #advance, #home, #ending { position: absolute; inset: 0; width: 100%; height: 100%; }
+#world { overflow: hidden; --pan-x: 0px; --pan-y: 0px; }
+.frame { isolation: isolate; overflow: hidden; opacity: 0; background: #101c20; transition: opacity .32s ease; }
+.frame.active { opacity: 1; }
+.plate, .foreground { display: block; object-fit: cover; pointer-events: none; user-select: none; }
+.plate { transform: translate3d(calc(var(--pan-x) * .25), calc(var(--pan-y) * .2), 0) scale(1.018); }
+.foreground { z-index: 4; transform: translate3d(calc(var(--pan-x) * .8), calc(var(--pan-y) * .55), 0) scale(1.045); }
+.actor {
+  --h: 137%; --top: 11%; --x: 23%; --depth: .52; --dy: .42;
+  position: absolute; z-index: 2; left: var(--x); top: var(--top); height: var(--h); aspect-ratio: 2 / 3;
+  transform: translate3d(calc(-50% + var(--pan-x) * var(--depth)), calc(var(--pan-y) * var(--dy)), 0);
+  transition: filter .28s ease; pointer-events: none;
+}
+.actor.right { --x: 77%; }
+.actor .breath, .actor img { display: block; width: 100%; height: 100%; }
+.actor img { object-fit: contain; user-select: none; }
+.breath { transform-origin: 50% 91%; }
+.frame.arrived .breath { animation: breath 5.6s ease-in-out infinite alternate; }
+.frame.arrived .right .breath { animation-delay: -2.7s; animation-duration: 6.3s; }
+@keyframes breath { from { transform: scale(1, 1); } to { transform: scale(1.002, 1.004); } }
+#stage[data-scale='wide'] .actor { --h: 76%; --top: 17%; }
+#stage[data-scale='close'] .actor, #stage[data-scale='detail'] .actor { --h: 183%; --top: 7%; }
+#stage[data-scale='wide'] .actor.left { --x: 25.5%; }
+#stage[data-scale='wide'] .actor.right { --x: 73.5%; }
+#stage[data-layout='solo'] .actor.left { --x: 32%; }
+#stage[data-layout='solo'] .actor.right { --x: 68%; }
+#stage[data-layout='duo'] .actor.listener { filter: saturate(.92) brightness(.91) blur(.9px); }
+#stage:is([data-focus='left'], [data-focus='right'])[data-layout='duo'] .plate { filter: blur(1.25px); }
+#stage .actor[data-framing='shoulder'] { --x: 14.5%; --h: 123%; --top: 5%; --depth: .94; --dy: .72; z-index: 3; }
+#stage .actor.right[data-framing='shoulder'] { --x: 85.5%; }
+#stage[data-scale='wide'] .actor[data-framing='shoulder'] { --h: 98%; --top: 18%; }
+#stage[data-scale='close'] .actor[data-framing='shoulder'], #stage[data-scale='detail'] .actor[data-framing='shoulder'] { --h: 136%; --top: 1.5%; }
+#shutter { z-index: 5; background: #10191e; pointer-events: none; opacity: 0; transition: opacity .22s ease; }
+#shutter.dark { opacity: 1; }
+#advance { z-index: 6; touch-action: manipulation; }
+#advance:focus-visible { outline-offset: -5px; }
+#place, #pause, #caption, #next, #action, #phone { position: absolute; }
+#place { z-index: 7; left: 3.8%; top: 5.1%; display: grid; grid-template-columns: auto 1fr; align-items: baseline; column-gap: .8em; row-gap: 1px; padding-left: .77em; border-left: 2px solid #a6b7a5; text-shadow: 0 1px 3px #061015, 0 0 8px #061015, 0 0 14px #061015; pointer-events: none; }
+#location { grid-column: 1; grid-row: 2; font: 900 clamp(17px, 1.42cqw, 25px)/1.34 var(--print); letter-spacing: .085em; }
+#date, #view { color: #e0e3d3; font: 500 clamp(12px, .9cqw, 16px)/1.4 var(--sans); letter-spacing: .12em; }
+#date { grid-column: 1 / -1; }
+#view { grid-row: 2; white-space: nowrap; }
+#pause { z-index: 10; top: 3.5%; right: 2.9%; width: 44px; height: 44px; font: 18px/1 var(--sans); color: #dee5db; text-shadow: 0 1px 4px #16242a; background: #0c1a206b; border: 1px solid #c3cfc338; }
+#pause:hover { background: #183035dc; }
+#caption { z-index: 7; top: 34%; left: 36%; width: 28%; pointer-events: none; text-shadow: -1px 0 1px #172124, 1px 0 1px #172124, 0 1px 1px #172124, 0 -1px 1px #172124, 0 1px 5px #09171b, 0 2px 11px #09171b; }
+#caption::before { content: ''; position: absolute; z-index: -1; inset: -20px -30px; background: radial-gradient(ellipse at center, #0c191f77 15%, #0c191f45 54%, transparent 74%); pointer-events: none; }
+#speaker { display: block; margin-bottom: .32em; color: #d7e2d2; font: 900 clamp(15px, 1.22cqw, 22px)/1.4 var(--print); letter-spacing: .12em; }
+#words { margin: 0; font: 500 var(--word-size)/1.5 var(--copy); line-break: strict; overflow-wrap: anywhere; }
+#stage[data-layout='solo'] #caption[data-side='right'] { left: 54%; width: 35%; }
+#stage[data-layout='solo'] #caption[data-side='left'] { left: 10%; width: 35%; }
+#stage[data-layout='solo'] #caption[data-side='center'] { left: 53%; width: 36%; }
+#next { z-index: 7; right: 4.2%; bottom: 4.1%; padding: 0 4px; color: #edf0dd; font: 24px/1 var(--sans); text-shadow: 0 1px 4px #101b20; pointer-events: none; }
+#action, #backHome, #home button, #retry, #readText { min-height: 44px; padding: 9px 19px; border: 1px solid #b9c9b79e; background: #172a2eec; color: #eceede; font: 900 16px/1.4 var(--print); letter-spacing: .07em; }
+#action { z-index: 9; left: 50%; bottom: 4.2%; transform: translateX(-50%); width: max-content; max-width: 65%; text-align: center; }
+#action::after { content: '›'; padding-left: .7em; color: #bdc8af; }
+#action:hover, #home button:hover, #backHome:hover, #retry:hover, #readText:hover { background: #425451; }
+#stage:has(#action:not([hidden])) #next { visibility: hidden; }
+/* Non-character inserts retain all four edges. Dialogue has a physical matte
+   below the picture, so a participant's hand or a written mark stays visible. */
+#stage[data-layout='insert'] .frame { bottom: auto; height: 79%; background: #111c21; }
+#stage[data-layout='insert'] .plate, #stage[data-layout='insert'] .foreground { object-fit: contain; transform: none; }
+#stage[data-layout='insert'] #caption { inset: auto auto 0 0; display: flex; flex-direction: column; justify-content: center; width: 100%; height: 21%; padding: 0 9%; background: #101c21; border-top: 1px solid #8da39c35; text-shadow: none; }
+#stage[data-layout='insert'] #caption::before { display: none; }
+#stage[data-layout='insert'] #speaker { font-size: clamp(13px, 1.05cqw, 20px); margin-bottom: .15em; color: #a9beb0; }
+#stage[data-layout='insert'] #words { line-height: 1.38; }
+#stage[data-layout='insert']:has(#action:not([hidden])) .frame { height: 70%; }
+#stage[data-layout='insert']:has(#action:not([hidden])) #caption { bottom: 12%; height: 18%; }
+#stage[data-layout='insert'] #action { bottom: 2%; }
+/* Both speakers keep the same reading measure. Move the type into the
+   gap by their shoulder, leaving faces and the near sleeve clear. */
+#stage[data-layout='duo'][data-focus='left'] #caption { translate: -1.4cqw 0; }
+#stage[data-layout='duo'][data-focus='right'] #caption { translate: 1.4cqw 0; }
+#stage[data-layout='duo'][data-focus='right'] #speaker { text-align: right; }
+#stage.turning :is(#caption,#action,#next,#phone) { visibility: hidden; }
+/* A phone is a separate object in the shot. Its screen belongs to the same
+   reading surface so a tap on a message can advance to the next line. */
+#stage[data-layout='phone'] .plate { filter: brightness(.71) saturate(.82); }
+#stage[data-layout='phone'] #caption { left: 11%; top: 34%; width: 38%; }
+#phone { z-index: 7; right: 9%; top: 7.5%; height: 85%; aspect-ratio: .568; padding: 8px; border: 1px solid #7f8d89; border-radius: 31px; background: #182020; box-shadow: 0 0 0 2px #111717, 2px 10px 24px #0811167d, inset 0 0 0 2px #43504b; pointer-events: none; }
+.phone-screen { position: relative; display: flex; flex-direction: column; align-items: stretch; height: 100%; overflow: hidden; padding: 9.5% 7.5% 8%; border-radius: 23px; background: #d6dbd0; color: #233431; }
+#phone::before { content: ''; z-index: 1; position: absolute; top: 12px; left: 40%; width: 20%; height: 4px; border-radius: 5px; background: #36423f; }
+.phone-head { display: block; margin: 0 0 10%; padding-bottom: 6%; border-bottom: 1px solid #849990; font: 900 16px/1.3 var(--print); letter-spacing: .065em; }
+#clip { display: block; align-self: stretch; width: 100%; aspect-ratio: 16 / 9; object-fit: contain; background: #142026; }
+#clipTime { display: block; margin: 4px 0 8%; text-align: right; color: #586c63; font: 12px/1.3 ui-monospace, monospace; }
+#clipTime:empty { display: none; }
+#account { display: block; margin: 0 0 6%; font: 900 16px/1.4 var(--print); }
+#message { margin: 0; font: clamp(17px, 1.53cqw, 26px)/1.55 var(--sans); white-space: pre-line; overflow-wrap: anywhere; }
+.phone-home { position: absolute; width: 27%; height: 3px; bottom: 2.1%; left: 36.5%; border-radius: 4px; background: #697b70; }
+#stage[data-layout] .actor.left[data-framing='shoulder'] { --x: 14.5%; }
+#stage[data-layout] .actor.right[data-framing='shoulder'] { --x: 85.5%; }
+#home, #ending { z-index: 12; display: flex; align-items: flex-end; padding: 0 0 9.5% 10%; background-position: center; background-size: cover; }
+#home { background-color: #273a3b; background-image: linear-gradient(90deg, #0d1d24eb, #102431b3 25%, #10233030 57%, transparent 79%), linear-gradient(0deg,#101d24a1,transparent 54%), url('art/00/gate.webp'); }
+#ending { background-color: #1f3333; background-image: linear-gradient(90deg, #101e25ea, #102129aa 32%, transparent 76%), linear-gradient(0deg,#101c239c,transparent 55%), url('art/08/lamp.webp'); }
+.home-copy, #ending > div { width: min(68%, 44rem); }
+#home small, #ending small { display: inline-flex; align-items: center; gap: 12px; color: #d2dccc; font: 900 15px/1.2 var(--print); letter-spacing: .18em; }
+#home small::before, #ending small::before { content: ''; width: 26px; height: 3px; background: #b86f55; }
+#home h1, #ending h1 { margin: 2.2cqh 0 4cqh -.05em; color: #ebe9d8; font: 900 clamp(67px, 8.35cqw, 145px)/1.06 var(--print); letter-spacing: .075em; text-shadow: 1px 2px 0 #2b4342, 0 3px 13px #0c17297d; }
+#home #resume, #home #resume[hidden] + #start { color: #203430; background: #d0dac9; border-color: #d0dac9; }
+#home #resume:hover, #home #resume[hidden] + #start:hover { background: #ecead8; }
+#home button + button { margin-left: 9px; }
+#home #resume[hidden] + #start { margin-left: 0; }
+#ending h1 { font-size: clamp(48px, 6.8cqw, 108px); }
+#ending p { margin: 0 0 1.7em; font: 500 24px/1.55 var(--copy); }
+#menu { width: min(660px, 78vw); max-width: none; max-height: 84vh; padding: 30px 36px 26px; color: #e8e9d7; background: #1a2b2e; border: 1px solid #829993; box-shadow: 0 12px 64px #07111582; }
+#menu::backdrop { background: #07131ad6; }
+#menu[open] { display: flex; flex-direction: column; }
+#menu > header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+#menu h2 { margin: 0; font: 900 29px/1.4 var(--print); letter-spacing: .12em; }
+#closeMenu { flex: none; width: 44px; height: 44px; font: 29px/1 var(--sans); color: #bfd0bd; }
+#closeMenu:hover { background: #34484a; }
+.tabs { display: flex; gap: 18px; flex: none; margin: 15px 0 9px; border-bottom: 1px solid #607775; }
+.tabs button { flex: none; position: relative; min-height: 40px; font: 900 15px/1.3 var(--print); color: #b1c0b5; }
+.tabs button:is([aria-selected='true'],[aria-pressed='true'],[aria-current='page'],.active), .tabs button:hover { color: #f3efdb; }
+.tabs button:is([aria-selected='true'],[aria-pressed='true'],[aria-current='page'],.active)::after { content: ''; position: absolute; height: 3px; left: 0; right: 0; bottom: -1px; background: #cfaa80; }
+#panel { min-height: 13rem; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: #788d82 transparent; padding: 4px 4px 4px 0; font: 17px/1.55 var(--copy); }
+#panel p { margin: .65em 0; }
+#panel b, #panel strong { color: #c7d4be; font: 900 15px/1.4 var(--print); }
+#panel button { min-height: 44px; padding: 8px 12px; text-align: left; border: 1px solid #6b827b; font: 15px/1.4 var(--sans); }
+#panel button:hover, #panel button[aria-pressed='true'] { background: #384e4c; }
+#panel label { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+#panel input { accent-color: #c1d0b9; }
+#failure { z-index: 15; position: absolute; left: 50%; bottom: 24%; transform: translateX(-50%); width: max-content; max-width: 90%; display: flex; align-items: center; gap: 10px; padding: 15px 19px; background: #182b2df5; border: 1px solid #80928b; }
+@media (max-width: 1100px) {
+  #stage[data-layout='duo'] #caption { left: 34.5%; width: 31%; }
+  #place { top: 4%; }
+  #phone { right: 9%; }
+}
+@media (max-height: 560px) {
+  #menu { padding: 18px 26px; max-height: 88vh; }
+  #menu h2 { font-size: 25px; }
+  .tabs { margin-top: 5px; }
+  #panel { min-height: 8rem; }
+}
+@media (max-width: 820px) {
+  #stage { --word-size: 19px; }
+  #stage.large { --word-size: 23px; }
+  #place { left: 3%; top: 3%; }
+  #location { font-size: 14px; }
+  #date, #view { font-size: 10px; }
+  #pause { top: 2%; right: 2%; }
+  #speaker { font-size: 13px; }
+  #phone { padding: 5px; border-radius: 22px; }
+  .phone-screen { border-radius: 16px; }
+  #phone::before { top: 8px; }
+  .phone-head, #account { font-size: 13px; }
+  #message { font-size: 12px; }
+  #home h1 { font-size: 55px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .plate, .foreground { transform: none; }
+  .actor { transform: translateX(-50%); }
+}
+.frame.active:not(.arrived) { opacity: 0; }
+.frame.active.leaving { opacity: 1; }
+.plate, .foreground { transition: transform .48s cubic-bezier(.22,.62,.35,1), filter .3s ease; }
+.actor { transition: transform .48s cubic-bezier(.22,.62,.35,1), filter .28s ease; }
+/* The architectural occluders are cut directly from their master plate.
+   Both layers use precisely the same registration and overscan. */
+.frame:has(> .foreground) > :is(.plate, .foreground) {
+  object-fit: cover; transform: translate3d(calc(var(--pan-x) * .25), calc(var(--pan-y) * .2), 0) scale(1.018);
+}
+.frame:has(> .foreground) > .foreground {
+  transform: translate3d(calc(var(--pan-x) * .25 + clamp(-1px, var(--pan-x) * .12, 1px)), calc(var(--pan-y) * .2), 0) scale(1.018);
+}
+#stage[data-layout='insert'] .frame:has(> .foreground) > :is(.plate, .foreground) { object-fit: contain; transform: none; }
+#stage.still :is(.breath, .plate, .actor, .frame, .foreground, #shutter) { animation: none; transition: none; }
+#stage.still .actor { transform: translateX(-50%); }
+#stage.still .frame .plate, #stage.still .frame .foreground { transform: none; }
+#menu ol { list-style: none; padding: 0; margin: 0; }
+#menu li { padding: 10px 0; border-bottom: 1px solid #78908a45; display: grid; grid-template-columns: 6.8em 1fr; gap: 13px; }
+#menu li strong { padding-top: .18em; }
+#menu:is([data-tab='chapters'],[data-tab='settings']) #panel { display: grid; align-content: start; gap: 6px; }
+#menu[data-tab='chapters'] #panel { grid-template-columns: repeat(2, 1fr); }
+#menu[data-tab='settings'] #panel button { width: 100%; }
+#menu[data-tab='settings'] #panel p { color: #b5c3b8; font: 13px/1.6 var(--sans); }
+#menu a { color: #d6decb; text-underline-offset: .2em; }
+/* The shopkeeper and these witnesses look camera-right in their drawn
+   master. Their reverse angle faces the host, who keeps her real hair part. */
+#stage .actor.right[data-actor='qin'] img,
+#stage[data-layout='duo'] .actor.right:is([data-actor='fushun'],[data-actor='deng'],[data-actor='huan'],[data-actor='huang'],[data-actor='aliang']) img { transform: scaleX(-1); }
+/* Screen registration is measured on the artwork, 328,56 to 515,379 on an
+   850 × 478 print. The actual bezel and fingers are already in the plate. */
+#stage[data-handset='true'] .plate { object-fit: fill; filter: none; transform: none; }
+#stage[data-handset='true'] #phone { left: 38.55%; top: 11.7%; right: auto; width: 22.1%; height: 67.7%; aspect-ratio: auto; padding: 0; border: 0; border-radius: 0; box-shadow: none; background: none; }
+#stage[data-handset='true'] #phone::before, #stage[data-handset='true'] .phone-home { display: none; }
+#stage[data-handset='true'] .phone-screen { padding: 5% 5.5% 3%; border: 0; border-radius: 1.3%; color: #e6e9de; background: #141d22; }
+#stage[data-handset='true'] .phone-head { display: flex; justify-content: space-between; align-items: center; margin: 0 0 5%; padding: 0 0 5%; border-bottom: 1px solid #576a68; color: #c5d5c9; font: 600 clamp(13px, 1.12cqw, 21px)/1.35 var(--sans); }
+#stage[data-handset='true'] .phone-head::after { content: '•••'; font-size: .66em; letter-spacing: .16em; }
+#stage[data-handset='true'] #clip { align-self: center; width: 112.4%; flex: none; }
+#stage[data-handset='true'] #clipTime { flex: none; margin: 4% 0 7%; color: #b8c7bd; font-size: clamp(10px, .87cqw, 16px); }
+#stage[data-handset='true'] #account { flex: none; margin: 0 0 4%; color: #edf0db; font: 700 clamp(14px, 1.21cqw, 23px)/1.3 var(--sans); }
+#stage[data-handset='true'] #message { font: clamp(16px, 1.55cqw, 28px)/1.45 var(--sans); }
+#stage[data-handset='true'] #phone[data-type='post'] .phone-head { box-shadow: inset 0 -2px #ac725e; color: #e4c7b8; }
+#stage[data-handset='true'] #caption { left: 5.3%; top: 34%; width: 26.2%; }
+#place { transition: opacity .24s ease; }
+#stage[data-layout='duo']:is([data-focus='left'], [data-focus='right']) #place:has(#view[hidden]) { opacity: 0; }

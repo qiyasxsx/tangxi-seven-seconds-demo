@@ -103,6 +103,7 @@
     // Ordinary reading must continue the motif.  The former time-window
     // reset made a slow reader hear every 7.5s as a fresh cue; only a real
     // narrative state change is allowed to restart the phrase.
+    if (line?.score && Object.prototype.hasOwnProperty.call(score, line.score)) target = line.score;
     if (target === scoreState) return;
     scoreState = target; scoreStep = 0; scoreFade = target === "silence" ? 0 : 1;
     scoreQuiet();
