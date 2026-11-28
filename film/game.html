@@ -1,11 +1,21 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#142027"><title>棠西村秘闻 · 夜访现场</title>
-<link rel="stylesheet" href="../passage/ui/tokens.css?v=5e06accf9627"><link rel="stylesheet" href="film.css?v=927f794cdf7d"><link rel="preload" as="image" href="art/00/gate.webp"></head>
+<link rel="stylesheet" href="../passage/ui/tokens.css?v=5e06accf9627"><link rel="stylesheet" href="film.css?v=927f794cdf7d"><link rel="preload" as="image" href="art/00/gate.webp"><script>
+window.addEventListener('error', function (event) {
+  var start = document.getElementById('start');
+  if (!start || !start.disabled || !(event.target instanceof HTMLScriptElement || event instanceof ErrorEvent)) return;
+  start.textContent = '重新载入';
+  start.removeAttribute('aria-busy');
+  start.disabled = false;
+  start.onclick = function () { location.reload(); };
+  document.getElementById('bootMessage').hidden = false;
+}, true);
+</script></head>
 <body><main id="stage" data-mode="title" data-layout="insert" data-focus="none" data-scale="wide" data-mood="ordinary">
 <div id="world" aria-hidden="true"></div><div id="shutter" aria-hidden="true"></div>
 <header id="place" hidden><small id="date"></small><span id="location"></span><small id="view" hidden></small></header><button type="button" id="pause" hidden aria-label="暂停，打开现场手记">Ⅱ</button>
 <button id="advance" hidden aria-label="继续阅读"></button><div id="caption" hidden aria-live="polite" aria-atomic="true"><b id="speaker"></b><p id="words"></p></div><span id="next" hidden aria-hidden="true">⌄</span><button id="action" hidden></button>
 <div id="phone" hidden><div class="phone-screen"><small class="phone-head"></small><img id="clip" alt="" hidden><span id="clipTime"></span><strong id="account"></strong><p id="message" aria-live="polite"></p><i class="phone-home" aria-hidden="true"></i></div></div>
-<section id="home"><div class="home-copy"><small>夜　访</small><h1>棠西村<br>秘闻</h1><button id="resume" hidden>继续阅读</button><button id="start">从头开始</button></div></section>
+<section id="home"><div class="home-copy"><small>夜　访</small><h1>棠西村<br>秘闻</h1><button id="resume" hidden>继续阅读</button><button id="start" disabled aria-busy="true">正在载入…</button><p id="bootMessage" hidden role="alert">剧本未载入，请重新打开本页。</p></div></section>
 <section id="ending" hidden><div><small>今宵剧场　／　终</small><h1>留下灯</h1><p>八月，第二个周二。</p><button id="backHome">回到片名</button></div></section>
 <dialog id="menu" aria-labelledby="menuTitle"><header><h2 id="menuTitle">现场手记</h2><button id="closeMenu" aria-label="继续阅读">×</button></header><div class="tabs"><button data-tab="history">刚才的话</button><button data-tab="chapters">走过的地方</button><button data-tab="settings">放映设置</button></div><div id="panel"></div></dialog>
 <div id="failure" hidden role="alert"><span>这幅画还没载入。</span><button id="retry">重新载入</button><button id="readText">先读这段文字</button></div></main>
@@ -19,4 +29,4 @@
 <script src="chapters/06.js?v=aa1d1f6b765e"></script>
 <script src="chapters/07.js?v=9fc60faee485"></script>
 <script src="chapters/08.js?v=0d4afb940928"></script>
-<script src="../passage/sound.js?v=9decce0ad217" data-score="../first-take/sfx/wet-market.m4a" data-iron="../first-take/sfx/iron-three.wav" data-field="../first-take/sfx/" data-footsteps="../first-take/sfx/"></script><script src="player.js?v=733e809da464"></script></body></html>
+<script src="../passage/sound.js?v=9decce0ad217" data-score="../first-take/sfx/wet-market.m4a" data-iron="../first-take/sfx/iron-three.wav" data-field="../first-take/sfx/" data-footsteps="../first-take/sfx/"></script><script src="player.js?v=dcbe224b1967"></script></body></html>

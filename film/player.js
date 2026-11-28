@@ -5,6 +5,9 @@
   const $ = id => document.getElementById(id);
   const stage = $('stage'), world = $('world'), sound = window.passageSound;
   const cast = window.FILM_CAST, chapters = window.FILM_CHAPTERS;
+  if (!cast || !sound || chapters?.length!==9 || Array.from(chapters).some(c=>!c?.scenes?.length)) {
+    throw new Error('九章剧本尚未载入');
+  }
   const records = [], byAddress = new Map(), images = new Map();
   const bookmark = 'tangxi.film.reading.1', preferenceKey = 'tangxi.film.preferences.1';
   const waits = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -287,4 +290,6 @@
     event.preventDefault();advance();
   });
   greatest=byAddress.get(saved.greatest)??-1;home();preferenceStyle();
+  $('bootMessage').hidden=true;
+  $('start').textContent='从头开始';$('start').disabled=false;$('start').removeAttribute('aria-busy');
 })();
