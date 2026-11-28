@@ -2967,19 +2967,27 @@ window.SeasonMargins = {
     'flood-cut-ebb':['puddle',64,83,32,6],
     'neighbors-cut-father-daughter':['porcelain',48,61,5,12]
   };
-  let requestedFrame='', frameReady=Promise.resolve(true), composition=0;
+  let requestedFrame='', displayedPlate='', frameReady=Promise.resolve(true), composition=0;
+  const actorLoads=new Map();
   const retryPlate=document.getElementById('retryPlate');
   function paint(url,layers=[]) {
     if(!url)return;
-    const key=JSON.stringify([url,layers]);
+    const plateKey=JSON.stringify([url,layers]);
+    const actors=[...actorLoads.values()];
+    const key=JSON.stringify([plateKey,...actors.map(actor=>actor.src)]);
     if(key===requestedFrame)return;
     requestedFrame=key;requested=url;
     retryPlate.hidden=true;
     stage.setAttribute('aria-busy','true');
     const turn=++generation;
     const load=src=>{const img=new Image();img.src=src;return img.decode().then(()=>img)};
-    frameReady=Promise.all([load(url),...layers.map(layer=>load(layer.src))]).then(([image,...images])=>{
+    const scenery=displayedPlate===plateKey ? Promise.resolve(null) :
+      Promise.all([load(url),...layers.map(layer=>load(layer.src))]);
+    frameReady=Promise.all([scenery,...actors.map(actor=>actor.ready)]).then(([pictures,...ready])=>{
       if(turn!==generation)return false;
+      if(ready.includes(false))throw new Error('Portrait unavailable');
+      if(!pictures){stage.removeAttribute('aria-busy');return true}
+      const [image,...images]=pictures;
       const next=1-active,target=plates[next],holder=layerHolders[next];
       holder.replaceChildren(...images.map((img,i)=>{
         const layer=layers[i];
@@ -3005,7 +3013,7 @@ window.SeasonMargins = {
       target.src=image.src;
       target.classList.add('on');holder.classList.add('on');
       plates[active].classList.remove('on');layerHolders[active].classList.remove('on');
-      active=next;stage.removeAttribute('aria-busy');return true;
+      active=next;displayedPlate=plateKey;stage.removeAttribute('aria-busy');return true;
     }).catch(()=>{
       if(turn===generation){
         requestedFrame='';retryPlate.hidden=false;
@@ -3067,12 +3075,19 @@ window.SeasonMargins = {
   }
   function showActor(rig,pose,hearing,expression='') {
     rig.classList.toggle('hearing',!!hearing);
-    if(!pose){rig.classList.remove('lit','newFace'); delete rig.dataset.pose;return}
+    if(!pose){rig.classList.remove('lit','newFace');actorLoads.delete(rig);delete rig.dataset.pose;return}
     const fresh=rig.dataset.pose!==pose;
-    if(fresh) {
+    if(fresh || actorLoads.get(rig)?.failed) {
       rig.dataset.pose=pose;rig.classList.remove('newFace');
       const src=portraits[pose]||(publicPose.has(pose)?shared+pose+'.webp':'cast/'+pose+'.webp');
-      rig.querySelector('img').src=src;
+      const img=rig.querySelector('img'),actor={src,failed:false};
+      actorLoads.set(rig,actor);rig.style.visibility='hidden';
+      rig.querySelector('i').style.backgroundImage='none';
+      img.src=src;
+      actor.ready=img.decode().then(()=>{
+        if(actorLoads.get(rig)!==actor)return false;
+        rig.style.removeProperty('visibility');return true;
+      },()=>{actor.failed=true;return false});
       rig.classList.toggle('full',pose==='qinStanding'||pose==='xuStanding');
       void rig.offsetWidth;
       rig.classList.add('newFace','lit');
@@ -3089,7 +3104,7 @@ window.SeasonMargins = {
     if(patch) {
       const [x,y,w,h]=patch.rect;
       Object.assign(overlay.style,{left:x*100+'%',top:y*100+'%',width:w*100+'%',height:h*100+'%',backgroundImage:'url("'+(localFace?'':'../first-take/')+patch.file+'")',opacity:'1'});
-    } else overlay.style.opacity='0';
+    } else {overlay.style.opacity='0';overlay.style.backgroundImage='none'}
   }
   const acoustic = place => /便利|柜台|粉摊|档|改衣铺|茶饮/.test(place)?'shop':/站|牌楼|街|巷口|楼前|桥底|楼顶|后巷/.test(place)?'road':/地下|楼梯|缓台|入口|铁梯/.test(place)?'hall':'room';
   function recordShot(scene,read,page) {
@@ -3163,7 +3178,6 @@ window.SeasonMargins = {
     const picture=cut.bg||shot.bg;
     const anchor=paintedEyelines[picture?.split('/').pop()?.replace(/\.(?:webp|jpe?g)$/,'')]?.[name];
     if(!decision && anchor && !cut.caption && !cut.layout){cut.caption=anchor;cut.pan??=(name==='林雨'?1:-1)}
-    paint(picture,cut.layers);
     window.passageSound.fieldAllowed(scene.id!=='E01-S03' && !(scene.id==='E01-S02' && cut.zone==='outside'));
     roomTone(cut.zone||acoustic(scene.place));window.passageSound.story(scene,line);
     locationCard(scene,cut);
@@ -3228,6 +3242,7 @@ window.SeasonMargins = {
     if(right==='azhe' && (reached('E06-S01.deposit') || scene.id==='E06-S04'))reaction='fear';
     if(right==='guoqiang' && (scene.id==='E02-S05' || reached('E02-S03.b06')))reaction='shame';
     showActor(far,right,right && !lookingRight && layout==='speech',reaction);
+    paint(picture,cut.layers);
     const plateName=picture?.split('/').pop().replace(/\.(?:webp|jpe?g)$/,'');
     const faces=!left && !right && !phoneUI && window.SeasonEyes?.[plateName];
     const eye=faces && layout==='speech' && faces[name];
