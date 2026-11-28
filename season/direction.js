@@ -15,6 +15,18 @@
     女骑手:'rider', 转租人:'sublessor', 代驾:'driver'
   };
   const publicPose = new Set(['linFrontListen','linBackListen','qinStanding','xuStanding']);
+  const portraits={
+    linFrontListen:'portraits/host.webp',linBackListen:'portraits/host-back.webp',
+    xiaoyin:'portraits/xiaoyin.webp',azhe:'portraits/azhe.webp',guoqiang:'portraits/guoqiang.webp',
+    luo:'portraits/luo.webp',huang:'portraits/huang.webp'
+  };
+  // Registered to the same ink silhouette. Expressions change on a story
+  // beat and hold through the reply, without animating the mouth per word.
+  const performance={
+    xiaoyin:{relief:{file:'portraits/xiaoyin-relief.webp',rect:[.34412,.16136,.28109,.15795]}},
+    azhe:{fear:{file:'portraits/azhe-fear.webp',rect:[.39182,.13409,.23339,.13864]}},
+    guoqiang:{shame:{file:'portraits/guoqiang-shame.webp',rect:[.36797,.12045,.25724,.15682]}}
+  };
   const media = /^(手机|旧带|录音|窗后声音|阿岑的语音)/;
   const narrator = /^(旁白|片尾|动作|声画)$/;
   // A master is the place the reader should still recognise after the text is
@@ -29,6 +41,12 @@
     'E00-S01': {
       key:'arch', bg:shared+'stop.webp', zone:'road', place:'棠西村口 · 旧厂牌楼',
       near:'linFrontListen', far:null, pan:0, focus:'left',
+      inserts:{
+        'E00-S01.bus-arrival':{bg:'approaches/village.webp',near:null,far:null,view:''},
+        'E00-S01.bus-mic':{bg:'approaches/village.webp',near:'linFrontListen',far:null,view:''},
+        'E00-S01.bus-answer':{bg:'approaches/village.webp',near:'linFrontListen',far:null,view:''},
+        'E00-S01.first-listen':{bg:'approaches/village.webp',near:null,far:null,view:''}
+      },
       phone: line => media.test(line?.speaker||'') || /\.b08\./.test(line?.id||'')
     },
     'E00-S02': {
@@ -63,6 +81,9 @@
     holder.className='shotLayers';plate.after(holder);
     return holder;
   });
+  const fieldFocus=document.createElement('div');
+  fieldFocus.className='fieldFocus';
+  document.getElementById('scenery').append(fieldFocus);
   // Local practical light and vapour share the coordinates of the painted object.
   const paintedEyelines={
     'streets-cut-lunch':{'林雨':[40,12,23],'阿岑':[45,8,20]},
@@ -101,7 +122,7 @@
         Object.assign(img.style,{left:(layer.x??0)+'%',top:(layer.y??0)+'%',width:(layer.w??100)+'%',height:(layer.h??100)+'%'});
         return img;
       }));
-      const field=practicals[url.split('/').pop().replace(/\.webp$/,'')];
+      const field=practicals[url.split('/').pop().replace(/\.(?:webp|jpe?g)$/,'')];
       if(field){
         const [type,x,y,w,h]=field, light=document.createElement('i');
         light.className='practical '+type;
@@ -159,16 +180,17 @@
   // While the player reads, request the next known plate at low priority.
   // Decisions keep their possible replies unloaded until the player commits.
   const warmed=new Set();
+  function warmPlate(src) {
+    if(!src||src===requested||warmed.has(src)||navigator.connection?.saveData)return;
+    warmed.add(src);
+    const preview=new Image();preview.fetchPriority='low';
+    preview.onerror=()=>warmed.delete(src);
+    preview.src=src;
+  }
   function warm(scene,line,page=0) {
     if(!line || navigator.connection?.saveData)return;
     const cut=continuityFrame(scene,line,framing(scene,line,page)).cut;
-    for(const src of [cut.bg,...(cut.layers||[]).map(l=>l.src)]){
-      if(!src || src===requested || warmed.has(src))continue;
-      warmed.add(src);
-      const preview=new Image();preview.fetchPriority='low';
-      preview.onerror=()=>warmed.delete(src);
-      preview.src=src;
-    }
+    for(const src of [cut.bg,...(cut.layers||[]).map(l=>l.src)])warmPlate(src);
   }
   function locationCard(scene,cut) {
     document.getElementById('calendar').textContent=cut.date||scene.time;
@@ -184,16 +206,24 @@
     const fresh=rig.dataset.pose!==pose;
     if(fresh) {
       rig.dataset.pose=pose;rig.classList.remove('newFace');
-      const src=publicPose.has(pose)?shared+pose+'.webp':'cast/'+pose+'.webp';
+      const src=portraits[pose]||(publicPose.has(pose)?shared+pose+'.webp':'cast/'+pose+'.webp');
       rig.querySelector('img').src=src;
       rig.classList.toggle('full',pose==='qinStanding'||pose==='xuStanding');
       void rig.offsetWidth;
       rig.classList.add('newFace','lit');
     }
-    const patch=window.TAKE_CAST_PLATES?.faces[pose]?.[expression], overlay=rig.querySelector('i');
+    const localFace=performance[pose]?.[expression];
+    const patch=localFace||window.TAKE_CAST_PLATES?.faces[pose]?.[expression], overlay=rig.querySelector('i');
+    if(pose==='linFrontListen'){
+      const concerned=['curious','brow','firm','concern'].includes(expression);
+      Object.assign(overlay.style,{inset:'0',width:'100%',height:'100%',
+        backgroundImage:'url("portraits/host-concern.webp")',opacity:concerned?'1':'0'});
+      return;
+    }
+    overlay.style.removeProperty('inset');
     if(patch) {
       const [x,y,w,h]=patch.rect;
-      Object.assign(overlay.style,{left:x*100+'%',top:y*100+'%',width:w*100+'%',height:h*100+'%',backgroundImage:'url("../first-take/'+patch.file+'")',opacity:'1'});
+      Object.assign(overlay.style,{left:x*100+'%',top:y*100+'%',width:w*100+'%',height:h*100+'%',backgroundImage:'url("'+(localFace?'':'../first-take/')+patch.file+'")',opacity:'1'});
     } else overlay.style.opacity='0';
   }
   const acoustic = place => /便利|柜台|粉摊|档|改衣铺|茶饮/.test(place)?'shop':/站|牌楼|街|巷口|楼前|桥底|楼顶|后巷/.test(place)?'road':/地下|楼梯|缓台|入口|铁梯/.test(place)?'hall':'room';
@@ -212,7 +242,7 @@
     const cut=framing(scene);
     return {time:cut.date||scene.time,place:cut.place||scene.place};
   }
-  function prepare(scene,revisit=false) {
+  function prepare(scene,revisit=false,arriving=false) {
     composition++;
     const fresh=sceneId!==scene.id;
     if(fresh){window.SeasonDoorway.clear();sceneId=scene.id;lastCue='';lastFoley='';showActor(near);showActor(far)}
@@ -225,10 +255,15 @@
     stage.dataset.chapter=scene.chapter;
     stage.dataset.scene=scene.id;
     window.passageSound.fieldAllowed(scene.id!=='E01-S03');
-    roomTone(zone);locationCard(scene,cut);
-    stage.dataset.mood=cut.mood||'';stage.dataset.moment='';stage.dataset.frame='';
+    roomTone(zone);window.passageSound.story(scene,null);locationCard(scene,cut);
+    stage.dataset.mood=cut.mood||'';stage.dataset.moment='';stage.dataset.frame='';stage.dataset.light=window.SeasonLight(scene.id);
     const art=sceneArt(scene);
-    paint(cut.bg||art.bg,cut.layers);
+    const entry=arriving && !revisit && window.SeasonJourney[scene.id];
+    paint(entry?.wide||cut.bg||art.bg,entry?[]:cut.layers);
+    if(entry?.threshold)warmPlate(entry.threshold);
+    stage.dataset.phone='';stage.dataset.medium='';stage.dataset.continuity='';
+    delete stage.dataset.paintedFocus;delete stage.dataset.print;delete stage.dataset.margin;
+    document.getElementById('phoneReplay').hidden=true;
     camera(0);
     stage.dataset.depth='site';
     return cut;
@@ -241,6 +276,18 @@
     const turn=++composition;
     let shot=recordShot(scene,history,page), text=line?.text || '', name=line?.speaker || '';
     let cut=framing(scene,line,page);
+    const cuts=window.SeasonCuts;
+    // Inserted reaction lines stay with the previous filmed moment. Going
+    // back to the scene's default master used to put dinner guests on stairs.
+    if(line && !cuts[line.id] && !cuts[line.id+'~'+page] &&
+       !/^E\d+-S\d+\.b\d+/.test(line.id)){
+      const prev=history.slice(0,-1).reverse().find(l=>cuts[l.id]||cuts[l.id+'~0']);
+      if(prev){
+        let finalPage=0;
+        for(let i=1;i<20;i++)if(cuts[prev.id+'~'+i])finalPage=i;
+        cut=framing(scene,prev,finalPage);delete cut.caption;delete cut.layout;cut.cue='';
+      }
+    }
     if(decision){
       const setup=window.SeasonCuts?.[decision.id];
       if(setup?.bg)Object.assign(cut,{layers:[],near:null,far:null});
@@ -249,13 +296,13 @@
     const held=continuityFrame(scene,line,cut,shot);
     cut=held.cut;shot=held.shot;
     const picture=cut.bg||shot.bg;
-    const anchor=paintedEyelines[picture?.split('/').pop()?.replace(/\.webp$/,'')]?.[name];
+    const anchor=paintedEyelines[picture?.split('/').pop()?.replace(/\.(?:webp|jpe?g)$/,'')]?.[name];
     if(!decision && anchor && !cut.caption && !cut.layout){cut.caption=anchor;cut.pan??=(name==='林雨'?1:-1)}
     paint(picture,cut.layers);
     window.passageSound.fieldAllowed(scene.id!=='E01-S03' && !(scene.id==='E01-S02' && cut.zone==='outside'));
-    roomTone(cut.zone||acoustic(scene.place));
+    roomTone(cut.zone||acoustic(scene.place));window.passageSound.story(scene,line);
     locationCard(scene,cut);
-    stage.dataset.frame=line?.id||'';
+    stage.dataset.frame=line?.id||'';stage.dataset.light=window.SeasonLight(scene.id,history,page);
     stage.dataset.mood=cut.mood||'';
     stage.dataset.caption=cut.caption?.join(',')||'';
     const reached=(id,from=0)=>history.some((l,i)=>l.id===id && (i<history.length-1 || page>=from));
@@ -264,12 +311,12 @@
 
     if(cut.moment!==undefined)stage.dataset.moment=cut.moment;
     const replay=scene.id==='E00-S01' && line?.id.includes('.b08.o');
-    const phoneUI=held.phone || replay;
-    const directMessage=phoneUI && /店家的儿子|水果头像/.test(name);
+    const phoneUI=held.phone || replay || cut.medium==='inbox';
+    const directMessage=cut.medium==='inbox' || (phoneUI && /店家的儿子|水果头像/.test(name));
     stage.dataset.medium=phoneUI?(directMessage?'inbox':'clip'):cut.view==='机内回放'?'playback':'';
     if(phoneUI){
       const phone=document.getElementById('phoneReplay');
-      phone.querySelector('i').textContent=directMessage?'‹　私信　·　'+name.split('·').pop():replay?'‹　投稿原件':'‹　夜访　／　作品';
+      phone.querySelector('i').textContent=directMessage?'‹　'+(cut.thread||'私信　·　'+name.split('·').pop()):replay?'‹　投稿原件':'‹　夜访　／　作品';
       phone.querySelector('small').textContent=directMessage?'发消息…':'00:07　━━━━━━　00:07';
     }
     stage.dataset.continuity=held.rule?.key||'';
@@ -296,16 +343,46 @@
        (scene.id==='E01-S05' && /阿岑只看见自己映/.test(text)))right='';
     if(cut.near!==undefined)left=cut.near;
     if(cut.far!==undefined)right=cut.far;
-    lookingRight=cut.focus ? cut.focus==='right' : !!right && cast[name]===right;
+    if(scene.id==='E00-S01' && ['E00-S01.b01','E00-S01.b02'].includes(line?.id))left='';
+    // A line belongs to its speaker. A held master can prescribe where to look
+    // for a gesture, but must not keep a listener in focus through their reply.
+    const speakerPose=cast[name];
+    const speakingFar=right && (speakerPose===right || (name==='梁安'&&right==='liangan-suit'));
+    lookingRight=layout==='speech' && (speakingFar||name==='林雨') ? !!speakingFar : cut.focus==='right';
     let expr='';
     if(left==='linFrontListen') {
-      if(/各位晚上好|欢迎|晚饭|鸡腿|吃饭|大家好|你打/.test(text))expr='welcome';
+      if(scene.id==='E00-S01')expr=reached('E00-S01.b05')?'concern':'welcome';
+      else if(/各位晚上好|欢迎|晚饭|鸡腿|吃饭|大家好|你打/.test(text))expr='welcome';
       else if(/怪|不见|害怕|别拍|没看见|听不见/.test(text))expr='brow';
       else if(/？|吗|什么/.test(text))expr='curious';
       else if(/答应|不播|我写的|同意/.test(text))expr='firm';
     }
     showActor(near,left,lookingRight,cut.nearFace||expr);
-    showActor(far,right,right && !lookingRight && layout==='speech',cut.farFace||(lookingRight && /？|怎么/.test(text)?'brow':''));
+    let reaction=cut.farFace || (lookingRight && /？|怎么/.test(text)?'brow':'');
+    if(right==='xiaoyin' && (reached('E01-S01.b10') || reached('E04-S03.sit-five')))reaction='relief';
+    if(right==='azhe' && (reached('E06-S01.deposit') || scene.id==='E06-S04'))reaction='fear';
+    if(right==='guoqiang' && (scene.id==='E02-S05' || reached('E02-S03.b06')))reaction='shame';
+    showActor(far,right,right && !lookingRight && layout==='speech',reaction);
+    const plateName=picture?.split('/').pop().replace(/\.(?:webp|jpe?g)$/,'');
+    const faces=!left && !right && !phoneUI && window.SeasonEyes?.[plateName];
+    const eye=faces && layout==='speech' && faces[name];
+    const space=faces && window.SeasonMargins?.[plateName];
+    // Reserve room for a full page before the first line on a painting.
+    // The same picture must not shrink when a longer reply comes in.
+    const size=parseFloat(getComputedStyle(document.getElementById('words')).fontSize)||24;
+    const charsPerLine=space && Math.floor(innerWidth*space[2]/100/(size*1.06));
+    const required=charsPerLine && size*(1.6*Math.ceil(59/charsPerLine)+1.45);
+    const margin=space && charsPerLine && required<=innerHeight*space[3]/100 ? space : null;
+    // The caption rail is an actual strip outside the painting. It stays for
+    // the entire exposure, including the narrator, so a reply never crops a face.
+    stage.dataset.print=faces ? (margin?'open':'rail') : '';
+    stage.dataset.margin=margin?margin.join(','):'';
+    stage.style.setProperty('--voice-x',(eye?Math.max(7,Math.min(55,eye[0]-17)):8)+'%');
+    if(eye){
+      fieldFocus.style.setProperty('--eye-x',eye[0]+'%');
+      fieldFocus.style.setProperty('--eye-y',eye[1]+'%');
+      stage.dataset.paintedFocus=name;
+    } else delete stage.dataset.paintedFocus;
     stage.dataset.depth=(left||right)?'people':'site';
     const view=document.getElementById('viewpoint');
     const paintedGhost=shot.bg && /umbrella-shelter|umbrella-strike|queue-double|witness-visitors/.test(shot.bg);
@@ -315,10 +392,12 @@
     view.textContent=cameraFile?'机内回放': '林雨所见';
     if(cut.view!==undefined){view.textContent=cut.view;view.hidden=!cut.view}
     stage.dataset.focus=lookingRight?'right':'left';
-    camera(cut.pan??(layout==='speech' && (left||right)?(lookingRight?-5.55:5.55):0));
+    const speechPan=left && right && (speakingFar||name==='林雨') && layout==='speech';
+    camera(eye ? (50-eye[0])*.09 : speechPan ? (lookingRight?-5.55:5.55) : cut.pan??0);
     stage.dataset.shot=shot.at || 'establish';
     const soundPage=window.SeasonCuts?.[line?.id+'~'+page];
-    const cueId=soundPage?.cue || line?.id==='E06-S04.b01' ? line.id+'~'+page : line?.id;
+    const pageContact=soundPage?.cue !== undefined || line?.id==='E06-S04.b01';
+    const cueId=pageContact ? line.id+'~'+page : line?.id;
     if(playCue && line && lastCue!==cueId)frameReady.then(visible=>{
       if(!visible||turn!==composition||stage.dataset.mode!=='advance')return;
       if(lastFoley!==line.id){window.SeasonFoley.perform(line);lastFoley=line.id}
@@ -329,10 +408,23 @@
       if(cue){lastCue=cueId;if(!window.SeasonFoley.contact(cue))window.passageSound.play(cue)}
     });
     if(replay)return 'message';
+    if(faces && !margin)return 'rail';
+    if(eye && margin)return 'speech';
     if(cut.layout)return cut.layout;
     if(cut.caption && layout==='speech')return 'speech';
     if(name==='阿岑' || (layout==='speech' && (!left&&!right || !cast[name])))return 'offscreen';
     return layout;
+  }
+  async function enterLocation(route) {
+    if(!route?.threshold||route.threshold===route.wide)return;
+    const world=document.getElementById('world');
+    world.style.transformOrigin=route.centre[0]+'% '+route.centre[1]+'%';
+    stage.classList.add('following');
+    if(!reduced())await new Promise(resolve=>setTimeout(resolve,420));
+    paint(route.threshold);
+    await frameReady;
+    if(!reduced())await new Promise(resolve=>setTimeout(resolve,660));
+    stage.classList.remove('following');
   }
   function travel(scene) {
     const art=sceneArt(scene);
@@ -342,19 +434,17 @@
     button.style.top=(Array.isArray(pos)?pos[1]:63)+'%';
     camera(-1.4);
   }
-  function leave(done) {
+  function leave(done,advanceThroughSpace=true) {
     const veil=document.getElementById('veil'),world=document.getElementById('world');
     const exit=sceneArt(globalThis.TX_SEASON.scenes[sceneId]).exit || [66,55];
     world.style.transformOrigin=exit[0]+'% '+exit[1]+'%';
-    stage.classList.add('walking');camera(-2.4);
-    setTimeout(()=>veil.classList.add('dark'),reduced()?0:245);
+    if(advanceThroughSpace){stage.classList.add('walking');camera(-2.4)}
+    setTimeout(()=>veil.classList.add('dark'),reduced()||!advanceThroughSpace?0:245);
     setTimeout(()=>{
       done();stage.classList.remove('walking');window.SeasonFoley.quiet();
-      const image=new Image();image.src=requested;
       const unveil=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>veil.classList.remove('dark')));
-      if(image.complete)unveil();
-      else {image.onload=unveil;image.onerror=unveil;setTimeout(unveil,1500)}
-    },reduced()?0:585);
+      frameReady.then(unveil,unveil);
+    },reduced()?0:advanceThroughSpace?585:325);
   }
   async function approach(place) {
     showActor(near);showActor(far);camera(0);
@@ -375,5 +465,5 @@
       far.classList.remove('matchCut');stage.classList.remove('lensHeld');
     }));
   }
-  window.SeasonDirection={prepare,compose,travel,leave,approach,warm,arrivalCard};
+  window.SeasonDirection={prepare,compose,travel,leave,approach,enterLocation,warm,arrivalCard};
 })();

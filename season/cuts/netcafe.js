@@ -3,11 +3,11 @@
   // Keep the four friends and station 17 spatially anchored; state changes use
   // only three return shots, then come back to this same desk.
   const master = {
-    bg: 'art/retake-middle-netcafe-master.webp', near: null, far: null,
+    bg: 'art/retake-middle-netcafe-master-r2.webp', near: null, far: null,
     view: '', zone: 'cafe', pan: 0,
   };
   const loss = {
-    bg: 'art/retake-middle-netcafe-loss.webp', near: null, far: null,
+    bg: 'art/retake-middle-netcafe-loss-r2.webp', near: null, far: null,
     view: '结算桌面', zone: 'cafe', pan: 0,
   };
   const suit = {
@@ -15,7 +15,15 @@
     view: '林雨所见', zone: 'cafe', pan: 0,
   };
   const jersey = {
-    bg: 'art/retake-middle-netcafe-jersey.webp', near: null, far: null,
+    bg: 'art/retake-middle-netcafe-jersey-r2.webp', near: null, far: null,
+    view: '林雨所见', zone: 'cafe', pan: 0,
+  };
+  const suitChair = {
+    bg: 'art/retake-middle-netcafe-suit-chair-r2.webp', near: null, far: null,
+    view: '林雨所见', zone: 'cafe', pan: 0,
+  };
+  const offerChair = {
+    bg: 'art/retake-middle-netcafe-offer-chair-r2.webp', near: null, far: null,
     view: '林雨所见', zone: 'cafe', pan: 0,
   };
   const disc = {
@@ -26,10 +34,6 @@
     bg: 'art/cafe-cut-return-card.webp', near: null, far: null,
     view: '林雨所见', zone: 'cafe', pan: 0,
   };
-  const chair = {
-    bg: 'art/cafe-cut-offer-chair.webp', near: null, far: null,
-    view: '林雨所见', zone: 'cafe', pan: 0,
-  };
   const farewell = {
     bg: 'art/cafe-cut-chat.webp', near: null, far: null,
     view: '林雨所见', zone: 'cafe', pan: 0,
@@ -38,8 +42,10 @@
     bg: 'art/cafe-stairs.webp', near: null, far: null,
     view: '', zone: 'hall', pan: 0,
   };
-  const afterwards = {...master, bg:'art/retake-middle-netcafe-playback.webp'};
-  const recording = {...afterwards, view: '机内回放'};
+  // After b12, the grey suit is a physical proof on 17's empty armrest.
+  // The private replay retains the four friends, never an anonymous empty room.
+  const afterwards = {...suitChair};
+  const recording = {...suitChair, view: '机内回放'};
   const counter = {...master, bg:'art/neighbors-cut-register.webp'};
   const cuts = window.SeasonCuts ||= {};
   Object.assign(cuts, {
@@ -59,9 +65,15 @@
     'E03-S05.b09': jersey,
     'E03-S05.b10': jersey,
     'E03-S05.b11': card,
-    'E03-S05.b12': chair,
-    'E03-S05.b13': chair,
-    'E03-S05.friends.1': recording,
+    // Stable paged beats: first page leaves the repaired 17 chair with its
+    // suit; second page visibly slides Liang An's good chair into offer.
+    'E03-S05.b12': suitChair,
+    'E03-S05.b12~0': suitChair,
+    'E03-S05.b12~1': offerChair,
+    'E03-S05.b13': offerChair,
+    'E03-S05.friends.1': loss,
+    'E03-S05.friends.1~0': loss,
+    'E03-S05.friends.1~1': recording,
     'E03-S05.b14': farewell,
     'E03-S05.b15': afterwards,
     'E03-S05.b16': afterwards,

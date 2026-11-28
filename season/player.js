@@ -5,7 +5,7 @@
   const DIRECTOR=new URLSearchParams(location.search).get('edition')==='director';
   const SAVE_BASE='tangxi.season.v1', SAVE=DIRECTOR?SAVE_BASE:SAVE_BASE+'.reading', PREFS=SAVE_BASE+'.prefs', LAST=DIRECTOR?SAVE_BASE+'.console':SAVE_BASE+'.reading.console';
   const reading=window.TX_READING||{route:{},stops:{},labels:{}};
-  const SAVE_EDITION=3;
+  const SAVE_EDITION=4;
   // Director-cut saves were already edition 2.  These are stable beat-prefix
   // renames from that shipped story to the rebuilt screenplay; option suffixes
   // and their feedback keep the same meaning after the prefix is translated.
@@ -61,7 +61,7 @@
   }
   const scene=()=>book.scenes[state.scene], beat=()=>scene().beats[state.beat];
   const chapter=()=>book.chapters.find(c=>c.id===scene().chapter);
-  function save(){store(SAVE,state)}
+  function save(){state.beatId=beat()?.id||null;store(SAVE,state)}
   function history() {
     return state.log.filter(l=>l.scene===state.scene);
   }
@@ -163,7 +163,8 @@
     $('slate').classList.toggle('smallArrival',c.scenes[0]!==s.id);
     $('chapterNo').textContent=c.scenes[0]===s.id?mark.time+'　／　'+mark.place:c.title+'　／　'+mark.time;
     $('chapterName').textContent=c.scenes[0]===s.id?c.title:mark.place;
-    $('arrive').textContent=sceneTitle(s);
+    const route=!DIRECTOR && window.SeasonJourney[s.id];
+    $('arrive').textContent=route?route.path:sceneTitle(s);
   }
   function visitSite(id) {
     closePanel();only('review');$('reviewSite').hidden=false;$('pause').hidden=true;
@@ -176,10 +177,13 @@
   function siteMarkers() {
     const s=scene(),entry=window.TX_SITES[s.id];
     if(entry && !state.inspected?.includes(s.id)){
-      const b=$('look');b.hidden=false;b.style.left=entry[0]+'%';b.style.top=entry[1]+'%';b.textContent=entry[2];
+      const route=!DIRECTOR && window.SeasonJourney[s.id];
+      const [x,y]=route?.point||entry;
+      const [title,detail]=route?.look||entry.slice(2);
+      const b=$('look');b.hidden=false;b.style.left=x+'%';b.style.top=y+'%';b.textContent=title;
       b.onclick=()=>{
         state.inspected ||= [];state.inspected.push(s.id);save();b.hidden=true;
-        openPanel(entry[2]);paragraph(entry[3]);menuButton('看回现场',closePanel);
+        openPanel(title);paragraph(detail);menuButton('看回现场',closePanel);
       };
     }
     const previous=state.visited[state.visited.lastIndexOf(s.id)-1];
@@ -190,14 +194,28 @@
   function render(audible=false) {
     for(;;){
       const s=scene();
-      if(activeScene!==s.id){activeScene=s.id;direction.prepare(s)}
+      if(activeScene!==s.id){activeScene=s.id;direction.prepare(s,false,!DIRECTOR&&state.phase==='arrive')}
       if(state.phase==='arrive'){arrival(s);siteMarkers();break}
       if(state.phase==='end'){
         only('end');$('endingTitle').textContent=s.title.replace(/^结局.　/,'');
         $('endingLine').textContent=s.id==='E08-S06'?'车门合上，街坊手里各留着一份。':s.id==='E08-S07'?'周二，柜台的小灯亮着。':'片尾署了名，原片的去向由合同决定。';break
       }
       if(state.phase==='travel'){
-        if(!DIRECTOR){go(state.nextScene||s.next);continue}
+        if(!DIRECTOR){
+          if(transition)break;
+          const destination=state.nextScene||s.next;
+          if(window.SeasonJourney[destination]?.match){
+            go(destination);state.phase='read';continue;
+          }
+          const leaving=state;
+          transition=true;only('transit');$('stage').classList.add('is-travelling');
+          direction.leave(()=>{
+            transition=false;$('stage').classList.remove('is-travelling');
+            if(state!==leaving)return;
+            go(destination);render();
+          },window.SeasonJourney[destination]?.wide!==window.SeasonJourney[s.id]?.wide);
+          break;
+        }
         only('route');direction.travel(s);const next=book.scenes[state.nextScene||s.next];
         const destination=direction.arrivalCard(next).place;
         $('route').textContent=($('locationName').textContent===destination?'留在':'前往')+'　'+destination;break
@@ -268,7 +286,8 @@
     if(saved.edition===SAVE_EDITION)return saved;
     const target=book.scenes[saved.scene];
     if(!target)return fresh();
-    const map=id=>remapLegacyId(id);
+    const original=saved.edition||1;
+    const map=id=>original<3?remapLegacyId(id):id;
     saved.flags=[...new Set((saved.flags||[]).map(map))];
     if(saved.missed)saved.missed=[...new Set(saved.missed.map(map))];
     if(saved.selected)saved.selected=map(saved.selected);
@@ -278,10 +297,10 @@
     if(saved.nextScene && !book.scenes[saved.nextScene])saved.nextScene=null;
 
     const sequence=target.beats;
-    let index=-1;
+    let index=beatForId(sequence,saved.readingStop||saved.beatId||'');
     if(saved.phase==='feedback' && saved.selected)
       index=sequence.findIndex(b=>(b.options||[]).some(o=>o.id===saved.selected));
-    if(index<0) {
+    if(index<0 && original<3) {
       const oldChoice=legacyChoices[saved.scene+':'+saved.beat];
       if(oldChoice)index=beatForId(sequence,oldChoice);
     }
@@ -289,7 +308,7 @@
       const latest=[...saved.log].reverse().find(line=>line.scene===saved.scene);
       if(latest)index=beatForId(sequence,latest.id);
     }
-    saved.beat=index>=0 ? index : Math.max(0,Math.min(saved.beat||0,sequence.length));
+    saved.beat=saved.phase==='arrive'?0:index>=0 ? index : Math.max(0,Math.min(saved.beat||0,sequence.length));
     saved.page=Math.max(0,saved.page||0);saved.fb=Math.max(0,saved.fb||0);
     if(saved.phase==='feedback' && !optionAtFor(sequence,saved.beat,saved.selected)) {
       saved.phase='read';saved.selected=null;saved.fb=0;saved.page=0;
@@ -308,11 +327,16 @@
   }
   $('stage').addEventListener('retryframe',()=>{
     if(!state)return;
-    if(state.phase==='arrive' || state.phase==='travel')direction.prepare(scene());
+    if(state.phase==='arrive' || state.phase==='travel')direction.prepare(scene(),false,!DIRECTOR&&state.phase==='arrive');
     render(true);
   });
   $('enter').onclick=async()=>{
     if(transition||state?.phase!=='arrive'||$('notebook').open)return;
+    if(!DIRECTOR && window.SeasonJourney[state.scene]?.threshold){
+      transition=true;only('approach');$('stage').classList.add('approaching');
+      try{await direction.enterLocation(window.SeasonJourney[state.scene])}
+      finally{transition=false;$('stage').classList.remove('approaching')}
+    }
     if(state.scene==='E00-S03')await approach('shop');
     state.phase='read';render(true);
   };
@@ -325,7 +349,7 @@
   $('return').onclick=home;
   $('start').onclick=()=>{
     if(valid(load(SAVE))) {
-      openPanel('重新开始');paragraph('从剪辑桌重新开始，会替换这份九章进度。');
+      openPanel('重新开始');paragraph('从棠西村口重新开始，会替换这份九章进度。');
       menuButton('从头开始',()=>{store(LAST,null);run(fresh())});menuButton('保留进度',closePanel);
     } else run(fresh());
   };

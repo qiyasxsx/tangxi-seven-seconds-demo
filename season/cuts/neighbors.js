@@ -37,9 +37,14 @@
   lock('b04', 'ledger-gap', {cue:'paper'});
   lock('b05.o1.f1 b05.o1.f2 b05.o2.f1', 'hasp');
   lock('b06 b07', 'hinge-photo');
-  lock('b08 b09 b10 b11 b12', 'father-daughter', {...vision, zone: 'room'});
+  // Father, absent seat, and the wet-haired daughter share one room state.
+  // Do not turn Lin into the daughter by placing her across the table.
+  lock('b08 b09 b10 b11 b12', null, {bg:'art/neighbors-cut-father-daughter-r2.webp', ...vision, zone: 'room'});
   lock('b13 b14', 'confession', vision);
-  lock('b15 b16 b17 b18 b19', 'drop-key', {...vision, cue:'keys'});
+  // The key has not fallen until b20.  Keep the real hallway and confession
+  // consequences visible; reserve the audible impact for its own beat.
+  lock('b15 b16 b17 b18 b19', '@zheng-lock', {...vision, zone:'hall'});
+  lock('b20', 'drop-key', {...vision, cue:'keys'});
 
   const after = scene('E02-S05', 'witness', 'hall');
   after('b01 keeper b02 return-binder', 'witness');

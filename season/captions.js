@@ -44,6 +44,11 @@
     // Phone text has a physical, portrait container.  Its CSS coordinates are
     // the phone screen rather than an empty patch between two actor silhouettes.
     if(stage.dataset.phone==='on')return;
+    if(stage.dataset.margin){
+      const [x,y,w]=stage.dataset.margin.split(',').map(Number);
+      Object.assign(text.style,{left:x+'%',top:y+'%',width:w+'%'});
+      return;
+    }
     if(stage.dataset.caption){
       const [x,y,w]=stage.dataset.caption.split(',').map(Number);
       Object.assign(text.style,{left:x+'%',top:y+'%',width:w+'%'});

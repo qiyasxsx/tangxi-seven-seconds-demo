@@ -121,3 +121,55 @@ body.paused .practical {animation-play-state:paused}
 #stage[data-phone=on] #advance[data-layout=message] #speaker {display:none}
 #stage[data-medium=clip] #phoneReplay::after {content:'';position:absolute;inset:44% 0 8%;pointer-events:none;background:linear-gradient(transparent,#0b151be8)}
 #stage[data-medium=inbox] #advance[data-layout=message] #utterance {max-height:52%}
+
+/* The physical reading size stays put from a voice in the lane to a line
+   shown on a phone. Names and interface labels keep their own hierarchy. */
+#stage { --read-size:clamp(21px,1.84vw,35px); }
+body.big #stage { --read-size:clamp(26px,2.23vw,42px); }
+#stage #advance[data-layout] #words {font-size:var(--read-size);line-height:1.48}
+#stage[data-phone=on] #phoneReplay {left:35.5%;width:29%;top:3%;height:93%}
+#stage[data-phone=on] #advance[data-layout=message] #utterance {left:37.2%;width:25.6%;top:48%;max-height:44%;padding:0;overflow-y:auto}
+#stage[data-medium=inbox] #advance[data-layout=message] #utterance {top:20%;max-height:65%}
+#stage .rig.near[data-pose=linBackListen] {height:132vh;width:auto;left:-1%;top:8%}
+#stage .rig.near[data-pose=linBackListen] :is(.breath,img) {height:100%;width:auto}
+#stage .rig.far:not(.full) {height:78vh;top:24%;right:7%}
+#stage .rig.hearing {filter:blur(max(1.4px,.15vw)) brightness(.88)}
+#scenery .fieldFocus {position:absolute;inset:0;pointer-events:none;opacity:0;
+  -webkit-backdrop-filter:blur(2.2px) brightness(.94);backdrop-filter:blur(2.2px) brightness(.94);
+  -webkit-mask-image:radial-gradient(ellipse 34% 61% at var(--eye-x,50%) var(--eye-y,38%),transparent 24%,#000 94%);
+  mask-image:radial-gradient(ellipse 34% 61% at var(--eye-x,50%) var(--eye-y,38%),transparent 24%,#000 94%);
+  transition:opacity .65s ease,--eye-x .78s ease,--eye-y .78s ease}
+@property --eye-x {syntax:'<percentage>';inherits:false;initial-value:50%}
+@property --eye-y {syntax:'<percentage>';inherits:false;initial-value:38%}
+#stage[data-painted-focus] #scenery .fieldFocus {opacity:1}
+#stage[data-mode=slate] #slate {background:linear-gradient(0deg,#101c25ce,transparent 49%);padding:4.8% 6.2%}
+#stage[data-mode=slate] #arrive {margin:.35em 0 .1em;max-width:42em}
+#stage.is-travelling :is(#advance,#pause,#look,#backSite), #stage.approaching :is(#look,#backSite) {pointer-events:none}
+#stage.is-travelling #advance {opacity:0;transition:opacity .25s}
+#stage.following #world {transform:scale(1.043);transition:transform 1.1s cubic-bezier(.3,.07,.28,1)}
+
+/* Print exposure over the film, beneath every letter and lens indicator.
+   A practical (stove, doorway, CRT or work lamp) has a direction on the set. */
+#exposure {position:absolute;inset:0;z-index:3;pointer-events:none;background:#74887d;opacity:0;transition:background-color 1.05s,opacity .9s;mix-blend-mode:soft-light}
+#stage[data-light=dusk] #exposure {background-color:#7b8697;opacity:.18}
+#stage[data-light=rain] #exposure {background-color:#1b3e55;opacity:.46}
+#stage[data-light=night] #exposure,#stage[data-light=stairwell] #exposure {background-color:#304c52;opacity:.38}
+#stage[data-light=screen] #exposure,#stage[data-light=crt] #exposure {background-color:#5c829e;opacity:.28}
+#stage[data-light=queue] #exposure,#stage[data-light=submerged] #exposure {background-color:#183e49;opacity:.52}
+#stage[data-light=loss] #exposure {background-color:#182731;opacity:.49}
+#stage:is([data-light=aftergame],[data-light=bench],[data-light=counter]) #exposure {background-color:#a79c7e;opacity:.23}
+#stage:is([data-light=supper],[data-light=hearth]) #exposure {background-color:#bd935c;opacity:.34}
+#stage[data-light=grate] #exposure {background-color:#536c63;opacity:.38}
+#stage[data-light=doorlight] #exposure {background-color:#b6a882;opacity:.32}
+#stage[data-light=witness] #exposure {background-color:#aa9f90;opacity:.22}
+#stage[data-light=day] #exposure {opacity:0}
+#stage[data-print=rail] {--rail-height:clamp(94px,20vh,195px)}
+#stage[data-print=rail] #world {bottom:var(--rail-height);background:#121d22}
+#stage[data-print=rail] #scenery {width:calc((100vh - var(--rail-height))*16/9);height:100%;inset:0 auto 0 50%;transform:translateX(calc(-50% + var(--camera)))}
+#stage[data-print=rail] #scenery > img {object-fit:contain}
+#stage[data-print=rail] #matte {bottom:var(--rail-height);background:linear-gradient(180deg,#0d1c2436,transparent 16%,transparent 96%,#09171d55)}
+#stage #advance[data-layout=rail] #utterance {left:var(--voice-x,8%);width:calc(94% - var(--voice-x,8%));right:auto;top:calc(100% - var(--rail-height));bottom:0;padding:.38em 3.8% .12em 0;display:flex;flex-direction:column;justify-content:center;background:transparent;line-height:1.45}
+#stage #advance[data-layout=rail] #speaker {font:600 clamp(12px,1vw,19px) var(--ui-serif);color:#bad0c3;letter-spacing:.12em;margin-bottom:.18em}
+#stage #advance[data-layout=rail] #speaker:empty {display:none}
+#stage #advance[data-layout=rail] #nextHint {right:2%;bottom:1.8%}
+.rig.near[data-pose=linFrontListen] .breath i {mask-image:radial-gradient(ellipse 23% 11% at 50% 21.5%,black 78%,transparent);-webkit-mask-image:radial-gradient(ellipse 23% 11% at 50% 21.5%,black 78%,transparent)}
